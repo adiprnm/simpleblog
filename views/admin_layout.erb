@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/css/main.css">
+  <title><%= @site["title"] %></title>
+</head>
+<body>
+  <main class="container">
+    <h1><%= site_settings["site.title"] %></h1>
+    <nav>
+      <a class="inline-block mr-2" href="/admin/posts">Posts</a>
+      <a class="inline-block mr-2" href="/admin/pages">Pages</a>
+      <a class="inline-block mr-2" href="/admin/navlinks">Navlinks</a>
+    </nav>
+    <%= yield %>
+  </main>
+</body>
+</html>

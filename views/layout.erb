@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/css/main.css">
+  <title><%= @page["title"] %> | <%= site_settings["site.title"] %></title>
+</head>
+<body>
+  <main class="container">
+    <h1><%= site_settings["site.title"] %></h1>
+    <nav>
+      <% navlinks.each do |link| %>
+        <a class="inline-block mr-2" href="<%= link["url"] %>"><%= link["name"] %></a>
+      <% end %>
+    </nav>
+    <%= yield %>
+  </main>
+</body>
+</html>

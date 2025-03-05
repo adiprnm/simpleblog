@@ -1,0 +1,35 @@
+<div class="mt-8">
+  <% unless @page["slug"] == "home" %>
+    <form action="/admin/pages/<%= @page['id'] %>" method="post">
+      <input type="hidden" name="_method" id="_method" value="delete">
+
+      <input class="btn btn--danger" type="submit" name="commit" onclick='return confirm("Are you sure?")' value="Delete">
+    </form>
+  <% end %>
+
+  <form action="/admin/pages/<%= @page["id"] %>" class="mt-4" method="post">
+    <input type="hidden" name="_method" id="_method" value="put">
+
+    <input type="text" name="title" placeholder="Title" id="title" value="<%= @page["title"] %>">
+    <div>
+      <span class="text-gray"><%= site_settings["site.base_url"] || "https://localhost:3000" %>/</span>
+      <input type="text" class="mt-4 inline border-b pb-1" name="slug" placeholder="Slug" id="slug" value="<%= @page["slug"] %>">
+    </div>
+    <% if @errors["title"] %>
+      <small class="text-danger block italic"><%= @errors["title"] %></small>
+    <% end %>
+    <textarea class="mt-8" name="content" placeholder="Post content" id="content"><%= @page["content"] %></textarea>
+    <% if @errors["content"] %>
+      <small class="text-danger block italic"><%= @errors["content"] %></small>
+    <% end %>
+    <div class="mt-4">
+      <% if @page['state'] == 'published' %>
+        <input class="inline-block mr-1 btn--primary" type="submit" name="commit" value="Save">
+        <input class="inline-block mr-1" type="submit" name="commit" value="Change to Draft">
+      <% else %>
+        <input class="inline-block mr-1 btn--primary" type="submit" name="commit" value="Publish">
+        <input class="inline-block mr-1" type="submit" name="commit" value="Save as Draft">
+      <% end %>
+    </div>
+  </form>
+</div>

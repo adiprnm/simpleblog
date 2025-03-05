@@ -1,0 +1,5 @@
+<article class="mt-8">
+  <small class="text-gray"><%= DateTime.parse(@post["published_at"]).strftime("%b %d, %Y") %></small>
+  <h1 class="mt-2"><%= @post["title"] %></h1>
+  <%= render_markdown @post["content"] %>
+</article>

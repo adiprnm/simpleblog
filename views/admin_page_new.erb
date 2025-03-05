@@ -1,0 +1,16 @@
+<div class="mt-8">
+  <form action="/admin/pages" method="post">
+    <input type="text" name="title" placeholder="Title" id="title" value="<%= @page["title"] %>">
+    <% if @errors["title"] %>
+      <small class="text-danger block italic"><%= @errors["title"] %></small>
+    <% end %>
+    <textarea class="mt-8" name="content" placeholder="Page content" id="content"><%= @page["content"] %></textarea>
+    <% if @errors["content"] %>
+      <small class="text-danger block italic"><%= @errors["content"] %></small>
+    <% end %>
+    <div class="mt-4">
+      <input class="inline-block mr-1 btn--primary" type="submit" name="commit" value="Publish">
+      <input class="inline-block mr-1" type="submit" name="commit" value="Save as Draft">
+    </div>
+  </form>
+</div>

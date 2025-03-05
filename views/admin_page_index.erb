@@ -1,0 +1,11 @@
+<div class="mt-8">
+  <a href="/admin/pages/new">
+    <button class="btn btn--primary">+ New Page</button>
+  </a>
+  <h3>Pages</h3>
+  <ul>
+    <% @pages.each do |page| %>
+      <li><%= Date.parse(page["created_at"]).strftime("%d %b %Y") %> – <a href="/admin/pages/<%= page["id"] %>/edit"><%= page["title"] %></a> <%= "(draft)" if page['state'] == 'draft' %></li>
+    <% end %>
+  </ul>
+</div>

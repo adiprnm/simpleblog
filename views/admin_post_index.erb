@@ -1,0 +1,11 @@
+<div class="mt-8">
+  <a href="/admin/posts/new">
+    <button class="btn btn--primary">+ New Post</button>
+  </a>
+  <h3>Posts</h3>
+  <ul>
+    <% @posts.each do |post| %>
+      <li><%= Date.parse(post["created_at"]).strftime("%d %b %Y") %> – <a href="/admin/posts/<%= post["id"] %>/edit"><%= post["title"] %></a> <%= "(draft)" if post['state'] == 'draft' %></li>
+    <% end %>
+  </ul>
+</div>

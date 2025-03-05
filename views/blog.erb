@@ -1,0 +1,16 @@
+<div>
+  <h1>Blog</h1>
+  <div>
+    <% @posts.each_with_index do |(year, posts), index| %>
+      <details <%= "open" if index.zero? %>>
+        <summary><%= year %></summary>
+
+        <ul>
+          <% posts.each do |post| %>
+            <li><%= Date.parse(post["published_at"]).strftime("%d %b %Y") %> – <a href="/<%= post["slug"] %>"><%= post["title"] %></a></li>
+          <% end %>
+        </ul>
+      </details>
+    <% end %>
+  </div>
+</div>
