@@ -6,7 +6,7 @@ require_relative 'database'
 
 def authorized?
   @auth ||= Rack::Auth::Basic::Request.new(request.env)
-  @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == ['admin', 'password']
+  @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [ENV['APP_USERNAME'], ENV['APP_PASSWORD']]
 end
 
 def authorize!
