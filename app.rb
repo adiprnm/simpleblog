@@ -363,6 +363,43 @@ delete '/admin/navlinks/:id' do
   redirect '/admin/navlinks'
 end
 
+get '/admin/settings' do
+  authorize!
+  @site = { 'title' => 'Settings' }
+  @errors = {}
+  @settings = site_settings
+  erb :admin_settings, layout: :admin_layout
+end
+
+put '/admin/settings' do
+  authorize!
+  settings = params['site_settings']
+  @errors = {}
+  settings.each do |setting|
+    key, value = setting.values_at('key', 'value')
+    @errors[key] = "#{key} is required" if value.empty?
+  end
+  if @errors.any?
+    @site = { 'title' => 'Settings' }
+    @settings = {}.tap do |hash|
+      settings.each do |setting|
+        key, value = setting.values_at('key', 'value')
+        hash[key] = value
+      end
+    end
+    return erb :admin_settings, layout: :admin_layout
+  end
+
+  db = create_database_connection
+  settings.each do |setting|
+    key, value = setting.values_at('key', 'value')
+    db.execute('UPDATE settings SET value = ? WHERE key = ?', [value, key])
+  end
+  db.close
+
+  redirect '/admin/settings'
+end
+
 get '/:slug' do
   db = create_database_connection
   @post = db.execute('SELECT title, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first

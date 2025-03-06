@@ -27,7 +27,7 @@ input {
   font-family: inherit;
 }
 input[type=submit], .btn {
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 1rem;
   border: none;
   font-family: inherit;
   cursor: pointer;
@@ -78,3 +78,4 @@ textarea {
 .pb-1 { padding-bottom: 0.25rem; }
 .pb-2 { padding-bottom: 0.5rem; }
 .pb-4 { padding-bottom: 1rem; }
+.w-full { width: 100%; }
