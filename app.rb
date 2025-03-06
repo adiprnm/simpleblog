@@ -269,6 +269,100 @@ delete '/admin/pages/:id' do
   redirect '/admin/pages'
 end
 
+get '/admin/navlinks' do
+  authorize!
+  db = create_database_connection
+  @navlinks = db.execute('SELECT * FROM navlinks ORDER BY position ASC')
+  db.close
+  @site = { 'title' => 'Navlinks' }
+  erb :admin_navlink_index, layout: :admin_layout
+end
+
+get '/admin/navlinks/new' do
+  authorize!
+  db = create_database_connection
+  last_link =  db.execute('SELECT position FROM navlinks ORDER BY position DESC LIMIT 1').first
+  @navlink = { 'position' => last_link['position'].to_i + 1 }
+  @site = { 'title' => 'New Navlink' }
+  erb :admin_navlink_new, layout: :admin_layout
+end
+
+post '/admin/navlinks' do
+  authorize!
+  db = create_database_connection
+  last_link = db.execute('SELECT position FROM navlinks ORDER BY position DESC LIMIT 1').first
+  params['position'] = params['position'].to_i.clamp(1, last_link['position'].to_i + 1)
+
+  db.execute(
+    'UPDATE navlinks SET position = position + 1 WHERE position >= ?',
+    params['position']
+  )
+  db.execute(
+    'INSERT INTO navlinks (name, position, url) VALUES (?, ?, ?)',
+    [params['name'], params['position'], params['url']]
+  )
+  db.close
+  redirect '/admin/navlinks'
+end
+
+get '/admin/navlinks/:id/edit' do
+  authorize!
+  db = create_database_connection
+  @navlink = db.execute('SELECT * FROM navlinks WHERE id = ? LIMIT 1', params['id']).first
+  halt 404, 'Navlink not found' unless @navlink
+  db.close
+  @site = { 'title' => "Edit #{@navlink['name']}" }
+  erb :admin_navlink_edit, layout: :admin_layout
+end
+
+put '/admin/navlinks/:id' do
+  authorize!
+  db = create_database_connection
+  navlink = db.execute('SELECT * FROM navlinks WHERE id = ? LIMIT 1', params['id']).first
+  halt 404, 'Navlink not found' unless navlink
+
+  last_link = db.execute('SELECT position FROM navlinks ORDER BY position DESC LIMIT 1').first
+  params['position'] = params['position'].to_i.clamp(1, last_link['position'].to_i + 1)
+
+  if params['position'].to_i > navlink['position'].to_i
+    db.execute(
+      'UPDATE navlinks SET position = position - 1 WHERE position > ?',
+      navlink['position']
+    )
+    db.execute(
+      'UPDATE navlinks SET position = position + 1 WHERE position >= ?',
+      params['position']
+    )
+  elsif params['position'].to_i < navlink['position'].to_i
+    db.execute(
+      'UPDATE navlinks SET position = position + 1 WHERE position < ?',
+      navlink['position']
+    )
+    db.execute(
+      'UPDATE navlinks SET position = position - 1 WHERE position <= ?',
+      params['position']
+    )
+  end
+
+  db.execute(
+    'UPDATE navlinks SET name = ?, position = ?, url = ? WHERE id = ?',
+    [params['name'], params['position'], params['url'], params['id']]
+  )
+  db.close
+  redirect '/admin/navlinks'
+end
+
+delete '/admin/navlinks/:id' do
+  authorize!
+  db = create_database_connection
+  navlink = db.execute('SELECT position FROM navlinks WHERE id = ? LIMIT 1', params['id']).first
+  halt 404, 'Navlink not found' unless navlink
+  db.execute('UPDATE navlinks SET position = position - 1 WHERE position > ?', navlink['position'])
+  db.execute('DELETE FROM navlinks WHERE id = ?', params['id'])
+  db.close
+  redirect '/admin/navlinks'
+end
+
 get '/:slug' do
   db = create_database_connection
   @post = db.execute('SELECT title, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first

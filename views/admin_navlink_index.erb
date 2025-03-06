@@ -1,0 +1,11 @@
+<div class="mt-8">
+  <a href="/admin/navlinks/new">
+    <button class="btn btn--primary">+ New Navlink</button>
+  </a>
+  <h3>Navlinks</h3>
+  <ul>
+    <% @navlinks.each do |navlink| %>
+      <li><a href="/admin/navlinks/<%= navlink["id"] %>/edit"><%= navlink["name"] %></a></li>
+    <% end %>
+  </ul>
+</div>

@@ -1,0 +1,16 @@
+<div class="mt-8">
+  <form action="/admin/navlinks/<%= @navlink['id'] %>" method="post">
+    <input type="hidden" name="_method" id="_method" value="delete">
+
+    <input class="btn btn--danger" type="submit" name="commit" onclick='return confirm("Are you sure?")' value="Delete">
+  </form>
+
+  <form action="/admin/navlinks/<%= @navlink["id"] %>" class="mt-4" method="post">
+    <input type="hidden" name="_method" id="_method" value="put">
+
+    <input type="text" name="name" class="block" placeholder="Title" id="name" value="<%= @navlink["name"] %>">
+    <input type="text" class="mt-4 block" name="url" placeholder="URL" id="url" value="<%= @navlink["url"] %>">
+    <input type="number" class="mt-4 block" name="position" placeholder="Position" id="position" value="<%= @navlink["position"] %>">
+    <input class="block mt-4 btn--primary" type="submit" name="commit" value="Save">
+  </form>
+</div>
