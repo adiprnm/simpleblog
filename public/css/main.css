@@ -51,6 +51,7 @@ textarea {
   resize: vertical;
   border-bottom: 1px solid #dfdfdf;
 }
+li a { text-decoration: none; }
 
 .container {
   max-width: 600px;

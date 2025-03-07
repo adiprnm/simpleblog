@@ -49,7 +49,11 @@ end
 get '/' do
   db = create_database_connection
   @page = db.execute("SELECT title, content FROM pages WHERE slug = 'home' LIMIT 1").first
-  @navlinks = db.execute('SELECT name, url FROM navlinks ORDER BY position ASC')
+  @recent_posts = db.execute(<<-SQL)
+    SELECT title, slug, published_at FROM posts
+    WHERE state = 'published'
+    ORDER BY published_at DESC LIMIT 6
+  SQL
   db.close
   erb :index, layout: :layout
 end
