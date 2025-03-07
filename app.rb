@@ -403,7 +403,8 @@ end
 get '/:slug' do
   db = create_database_connection
   @post = db.execute('SELECT title, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
-  halt 404, 'Post not found' unless @post
+  @post ||= db.execute('SELECT title, published_at, content FROM pages WHERE slug = ? LIMIT 1', params['slug']).first
+  halt 404, 'Post/page not found!' unless @post
   @page = @post
   db.close
   erb :post, layout: :layout
