@@ -11,6 +11,15 @@
       <% end %>
     </div>
 
+    <div class="mt-4">
+      <label for="site_base_url">Base URL</label>
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key" value="site.base_url">
+      <input type="text" name="site_settings[][value]" class="block w-full border-b" id="site_base_url" value="<%= @settings["site.base_url"] %>">
+      <% if @errors["site.base_url"] %>
+        <small class="text-danger block italic"><%= @errors["site.base_url"] %></small>
+      <% end %>
+    </div>
+
     <input type="submit" name="commit" value="Save" class="btn--primary mt-4">
   </form>
 </div>
