@@ -12,7 +12,7 @@
 
     <input type="text" name="title" placeholder="Title" id="title" value="<%= @page["title"] %>">
     <div>
-      <span class="text-gray"><%= site_settings["site.base_url"] || "https://localhost:3000" %>/</span>
+      <span class="text-gray"><%= request.base_url %>/</span>
       <input type="text" class="mt-4 inline border-b pb-1" name="slug" placeholder="Slug" id="slug" value="<%= @page["slug"] %>">
     </div>
     <% if @errors["title"] %>
