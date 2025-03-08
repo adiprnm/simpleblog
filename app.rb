@@ -258,7 +258,7 @@ put '/admin/pages/:id' do
             'published'
           end
   slug = params['slug'].to_s.length.positive? ? slugify(params['slug']) : slugify(params['title'])
-  to_be_updated_fields = %w[title content, state]
+  to_be_updated_fields = %w[title content state]
   to_be_updated_values = [params['title'], params['content'], state]
   if slug && slug != page['slug']
     to_be_updated_fields << 'slug'
