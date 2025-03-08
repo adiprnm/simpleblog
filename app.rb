@@ -44,6 +44,18 @@ helpers do
   def navlinks
     @navlinks ||= create_database_connection.execute('SELECT name, url FROM navlinks ORDER BY position ASC')
   end
+
+  def full_path
+    request.base_url + request.path
+  end
+
+  def favicon_path
+    "#{request.base_url}/images/favicon.svg"
+  end
+
+  def og_image_path
+    site_settings['site.og_image'] || "#{request.base_url}/images/default-og-image.png"
+  end
 end
 
 get '/' do

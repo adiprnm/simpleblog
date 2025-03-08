@@ -32,7 +32,17 @@ db.execute <<-SQL
 SQL
 
 db.execute <<-SQL
-  INSERT INTO settings (id, key, value) VALUES (1, 'site.title', "Lorem Ipsum") ON CONFLICT DO NOTHING;
+  INSERT INTO settings (id, key, value) VALUES (1, 'site.title', "My Blog") ON CONFLICT DO NOTHING;
+SQL
+db.execute <<-SQL
+  INSERT INTO settings (id, key, value) VALUES (2, 'site.description', "Small blog is awesome!")
+  ON CONFLICT DO UPDATE SET key = excluded.key, value = excluded.value
+  WHERE id = excluded.id;
+SQL
+db.execute <<-SQL
+  INSERT INTO settings (id, key, value) VALUES (3, 'site.twitter.username', "john_doe")
+  ON CONFLICT DO UPDATE SET key = excluded.key, value = excluded.value
+  WHERE id = excluded.id;
 SQL
 
 db.close

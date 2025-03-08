@@ -11,6 +11,24 @@
       <% end %>
     </div>
 
+    <div class="mt-4">
+      <label for="site_name">Site description</label>
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key" value="site.description">
+      <input type="text" name="site_settings[][value]" class="block w-full border-b" id="site_description" value="<%= @settings["site.description"] %>">
+      <% if @errors["site.description"] %>
+        <small class="text-danger block italic"><%= @errors["site.description"] %></small>
+      <% end %>
+    </div>
+
+    <div class="mt-4">
+      <label for="site_name">Twitter username</label>
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key" value="site.twitter.username">
+      <input type="text" name="site_settings[][value]" class="block w-full border-b" id="twitter_username" value="<%= @settings["site.twitter.username"] %>">
+      <% if @errors["site.twitter.username"] %>
+        <small class="text-danger block italic"><%= @errors["site.twitter.username"] %></small>
+      <% end %>
+    </div>
+
     <input type="submit" name="commit" value="Save" class="btn--primary mt-4">
   </form>
 </div>

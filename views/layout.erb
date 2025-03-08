@@ -2,9 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <%
+    title = @page["title"] || site_settings["site.title"]
+    description = @page["description"] || site_settings["site.description"]
+    favicon = site_settings["site.favicon"] || favicon_path
+    json_ld = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "author": {
+        "@type": "Person",
+        "name": site_settings['site.title']
+      },
+      "dateModified": @page['updated_at'],
+      "description": description,
+      "headline": description,
+      "image": og_image_path,
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": full_path
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": site_settings['site.title'],
+        "logo": {
+          "@type": "ImageObject",
+          "url": favicon
+        }
+      },
+      "url": full_path
+    }
+  %>
+
+  <title><%= title %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="og:title" content="<%= title %>">
+  <meta name="author" content="<%= title %>">
+  <meta name="og:locale" content="en_US">
+  <meta name="description" content="<%= description %>">
+  <meta name="og:description" content="<%= description %>">
+  <meta name="og:url" content="<%= full_path %>">
+  <meta name="og:site_name" content="<%= site_settings["site.title"] %>">
+  <meta name="og:image" content="<%= og_image_path %>">
+  <meta name="og:type" content="article">
+  <meta name="article:published_time" content="<%= @page["published_at"] %>">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="<%= og_image_path %>">
+  <meta name="twitter:title" content="<%= title %>">
+  <meta name="twitter:site" content="<%= site_settings["site.twitter.username"] %>">
+  <meta name="twitter:creator" content="<%= site_settings["site.title"] %>">
+  <meta name="twitter:description" content="<%= description %>">
+
+  <link rel="canonical" href="<%= full_path %>">
   <link rel="stylesheet" href="/css/main.css">
-  <title><%= @page["title"] %> | <%= site_settings["site.title"] %></title>
+  <link rel="icon" href="<%= favicon %>">
+  <script type="application/ld+json">
+    <%= JSON.pretty_generate(json_ld) %>
+  </script>
 </head>
 <body>
   <main class="container px-4">
