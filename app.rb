@@ -56,6 +56,10 @@ helpers do
   def og_image_path
     site_settings['site.og_image'] || "#{request.base_url}/images/default-og-image.png"
   end
+
+  def deployment_id
+    File.read('deployment_id').chomp
+  end
 end
 
 get '/' do

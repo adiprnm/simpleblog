@@ -1,2 +1,3 @@
 /storage/*
 !/storage/.keep
+/deployment_id

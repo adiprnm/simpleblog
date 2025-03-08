@@ -19,6 +19,7 @@ COPY --from=builder /usr/local/bundle /usr/local/bundle
 
 # Copy the application code
 COPY . .
+RUN date +%s > deployment_id
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
