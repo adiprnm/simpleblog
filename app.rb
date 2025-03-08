@@ -142,12 +142,6 @@ put '/admin/posts/:id' do
   db = create_database_connection
   post = db.execute('SELECT * FROM posts WHERE id = ? LIMIT 1', params['id']).first
   halt 404, 'Post not found' unless post
-  if ['Change to Draft', 'Save as Draft'].include?(params['commit'])
-    db.execute("UPDATE posts SET state = 'draft', updated_at = time('now') WHERE id = ?", params['id'])
-    db.close
-    return redirect '/admin/posts'
-  end
-
   @errors = {}
   @errors['title'] = 'Title is required' if params['title'].empty?
   @errors['content'] = 'Content is required' if params['content'].empty?
@@ -157,9 +151,14 @@ put '/admin/posts/:id' do
     return erb :admin_post_edit, layout: :admin_layout
   end
 
+  state = if ['Change to Draft', 'Save as Draft'].include?(params['commit'])
+            'draft'
+          else
+            'published'
+          end
   slug = params['slug'].to_s.length.positive? ? slugify(params['slug']) : slugify(params['title'])
-  to_be_updated_fields = %w[title content]
-  to_be_updated_values = [params['title'], params['content']]
+  to_be_updated_fields = %w[title content state]
+  to_be_updated_values = [params['title'], params['content'], state]
   if slug && slug != post['slug']
     to_be_updated_fields << 'slug'
     to_be_updated_values << slug
@@ -167,7 +166,7 @@ put '/admin/posts/:id' do
   to_be_updated_values << params['id']
 
   db.execute(
-    "UPDATE posts SET #{to_be_updated_fields.map { |f| "#{f} = ?" }.join(', ')}, state = 'published', updated_at = time('now') WHERE id = ?",
+    "UPDATE posts SET #{to_be_updated_fields.map { |f| "#{f} = ?" }.join(', ')}, updated_at = time('now') WHERE id = ?",
     to_be_updated_values
   )
   db.close
@@ -243,11 +242,6 @@ put '/admin/pages/:id' do
   db = create_database_connection
   page = db.execute('SELECT * FROM pages WHERE id = ? LIMIT 1', params['id']).first
   halt 404, 'Page not found' unless page
-  if ['Change to Draft', 'Save as Draft'].include?(params['commit'])
-    db.execute("UPDATE pages SET state = 'draft', updated_at = time('now') WHERE id = ?", params['id'])
-    db.close
-    return redirect '/admin/pages'
-  end
 
   @errors = {}
   @errors['title'] = 'Title is required' if params['title'].empty?
@@ -258,9 +252,14 @@ put '/admin/pages/:id' do
     return erb :admin_page_edit, layout: :admin_layout
   end
 
+  state = if ['Change to Draft', 'Save as Draft'].include?(params['commit'])
+            'draft'
+          else
+            'published'
+          end
   slug = params['slug'].to_s.length.positive? ? slugify(params['slug']) : slugify(params['title'])
-  to_be_updated_fields = %w[title content]
-  to_be_updated_values = [params['title'], params['content']]
+  to_be_updated_fields = %w[title content, state]
+  to_be_updated_values = [params['title'], params['content'], state]
   if slug && slug != page['slug']
     to_be_updated_fields << 'slug'
     to_be_updated_values << slug
@@ -268,7 +267,7 @@ put '/admin/pages/:id' do
   to_be_updated_values << params['id']
 
   db.execute(
-    "UPDATE pages SET #{to_be_updated_fields.map { |f| "#{f} = ?" }.join(', ')}, state = 'published', updated_at = time('now') WHERE id = ?",
+    "UPDATE pages SET #{to_be_updated_fields.map { |f| "#{f} = ?" }.join(', ')}, updated_at = time('now') WHERE id = ?",
     to_be_updated_values
   )
   db.close
