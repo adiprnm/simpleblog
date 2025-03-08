@@ -156,7 +156,7 @@ put '/admin/posts/:id' do
           else
             'published'
           end
-  published_at = post['published_at'] || Time.now
+  published_at = post['published_at'] || Time.now.to_s
   slug = params['slug'].to_s.length.positive? ? slugify(params['slug']) : slugify(params['title'])
   to_be_updated_fields = %w[title content state published_at]
   to_be_updated_values = [params['title'], params['content'], state, published_at]
@@ -258,7 +258,7 @@ put '/admin/pages/:id' do
           else
             'published'
           end
-  published_at = page['published_at'] || Time.now
+  published_at = page['published_at'] || Time.now.to_s
   slug = params['slug'].to_s.length.positive? ? slugify(params['slug']) : slugify(params['title'])
   to_be_updated_fields = %w[title content state published_at]
   to_be_updated_values = [params['title'], params['content'], state, published_at]
