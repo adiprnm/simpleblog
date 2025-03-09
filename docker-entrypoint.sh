@@ -11,6 +11,13 @@ if [ "${1}" == "bundle" ] && [ "${2}" == "exec" ] && [ "${3}" == "puma" ]; then
 
   ruby ddl.rb
   ruby predefined_data.rb
+
+  # Create the uploads directory
+  if [ -d storage/uploads ]; then
+    echo "Creating upload directories..."
+    mkdir -p storage/uploads
+    ln -s ../storage/uploads public/uploads
+  fi
 fi
 # Execute the given command
 exec "$@"

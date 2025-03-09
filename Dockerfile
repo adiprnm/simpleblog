@@ -23,11 +23,6 @@ COPY . .
 # Set the deployment ID for asset caching
 RUN date +%s > deployment_id
 
-# Create the uploads directory
-RUN mkdir -p storage/uploads
-
-RUN ln -s ../storage/uploads public/uploads
-
 # Copy the entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 
