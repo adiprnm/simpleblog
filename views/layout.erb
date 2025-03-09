@@ -68,6 +68,9 @@
       <% end %>
     </nav>
     <%= yield %>
+    <footer class="text-center mt-8 text-sm text-gray mb-16">
+      <%= render_markdown site_settings["site.text.footer"] %>
+    </footer>
   </main>
 </body>
 </html>

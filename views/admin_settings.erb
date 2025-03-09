@@ -4,7 +4,7 @@
 
     <div>
       <label for="site_name">Site name</label>
-      <input type="hidden" name="site_settings[][key]" id="site_settings__key" value="site.title">
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key_title" value="site.title">
       <input type="text" name="site_settings[][value]" class="block w-full border-b" id="site_name" value="<%= @settings["site.title"] %>">
       <% if @errors["site.title"] %>
         <small class="text-danger block italic"><%= @errors["site.title"] %></small>
@@ -13,10 +13,19 @@
 
     <div class="mt-4">
       <label for="site_name">Site description</label>
-      <input type="hidden" name="site_settings[][key]" id="site_settings__key" value="site.description">
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key_description" value="site.description">
       <input type="text" name="site_settings[][value]" class="block w-full border-b" id="site_description" value="<%= @settings["site.description"] %>">
       <% if @errors["site.description"] %>
         <small class="text-danger block italic"><%= @errors["site.description"] %></small>
+      <% end %>
+    </div>
+
+    <div class="mt-4">
+      <label for="footer_text">Footer text</label>
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key_footer_text" value="site.text.footer">
+      <input type="text" name="site_settings[][value]" class="block w-full border-b text-monospace" id="site_footer_text" value="<%= @settings["site.text.footer"] %>">
+      <% if @errors["site.text.footer"] %>
+        <small class="text-danger block italic"><%= @errors["site.text.footer"] %></small>
       <% end %>
     </div>
 
