@@ -4,7 +4,7 @@
     <% if @errors["title"] %>
       <small class="text-danger block italic"><%= @errors["title"] %></small>
     <% end %>
-    <textarea class="mt-8" name="content" placeholder="Post content" id="content"><%= @post["content"] %></textarea>
+    <textarea class="mt-8" id="content" name="content" placeholder="Post content" id="content"><%= @post["content"] %></textarea>
     <% if @errors["content"] %>
       <small class="text-danger block italic"><%= @errors["content"] %></small>
     <% end %>
@@ -14,3 +14,5 @@
     </div>
   </form>
 </div>
+
+<%= erb :_file_upload %>

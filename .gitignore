@@ -1,3 +1,5 @@
 /storage/*
-!/storage/.keep
+/storage/uploads/*
+!/storage/uploads
 /deployment_id
+!.gitkeep

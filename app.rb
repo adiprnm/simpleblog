@@ -23,6 +23,7 @@ def slugify(string)
 end
 
 set :public_folder, "#{__dir__}/public"
+set :upload_folder, "#{__dir__}/storage/uploads"
 
 helpers do
   def render_markdown(text)
@@ -419,6 +420,34 @@ put '/admin/settings' do
   db.close
 
   redirect '/admin/settings'
+end
+
+post '/admin/upload' do
+  content_type :json
+
+  upload = params['file']
+  if upload
+    filename = "#{SecureRandom.uuid}.#{upload[:filename].split('.').last}"
+    filepath = File.join(settings.upload_folder, filename)
+    server_path = File.join(request.base_url, 'uploads', filename)
+    File.open(filepath, 'wb') do |f|
+      f.write(upload['tempfile'].read)
+    end
+    { success: true, path: server_path, filename: upload[:filename] }.to_json
+  else
+    status 400
+    { success: false, message: 'No file uploaded' }.to_json
+  end
+end
+
+get '/uploads/:filename' do |filename|
+  file_path = File.expand_path(File.join(settings.public_folder, 'uploads', filename))
+
+  if File.exist?(file_path)
+    send_file file_path
+  else
+    halt 404, 'File not found'
+  end
 end
 
 get '/:slug' do

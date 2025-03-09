@@ -1,0 +1,79 @@
+<div class="mt-4">
+  <label for="image" id="image">Upload Image</label>
+  <input type="file" id="file" name="image" accept="image/*">
+  <div class="mt-4" id="status"></div>
+</div>
+
+<script>
+  const fileInput = document.getElementById('file');
+  const statusDiv = document.getElementById('status');
+  const content = document.getElementById('content');
+
+  fileInput.addEventListener('change', function(event) {
+    // Get the selected file
+    const file = event.target.files[0];
+    if (!file) return;
+
+    uploadFile(file);
+  });
+
+  function uploadFile(file) {
+    // Create a FormData object to send the file
+    const formData = new FormData();
+
+    // Add the file to the FormData object
+    // 'file' is the name the server expects for the uploaded file
+    formData.append('file', file);
+
+    // Optional: Add additional data if needed
+    formData.append('filename', file.name);
+
+    // Show upload status
+    statusDiv.textContent = `Uploading ${file.name}...`;
+
+    // Create and configure the XMLHttpRequest object
+    const xhr = new XMLHttpRequest();
+
+    // Configure the request
+    xhr.open('POST', '/admin/upload', true);
+
+    // Set up event handlers
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        statusDiv.style.color = '#4CAF50';
+        statusDiv.textContent = 'Upload successful!';
+        // Parse and use the response if needed
+        const response = JSON.parse(xhr.responseText);
+        const imageMarkdown = `![${response.filename}](${response.path})`;
+
+        let contentValue = content.value
+        if (contentValue.endsWith('\n')) {
+          contentValue += imageMarkdown
+        } else {
+          contentValue += `\n${imageMarkdown}`
+        }
+        content.value = contentValue
+      } else {
+        statusDiv.style.color = 'red';
+        statusDiv.textContent = `Upload failed. Server returned ${xhr.status}: ${xhr.statusText}`;
+      }
+      fileInput.value = '';
+    };
+
+    xhr.onerror = function() {
+      statusDiv.style.color = 'red';
+      statusDiv.textContent = 'Upload failed due to network error';
+    };
+
+    // Optional: Track upload progress
+    xhr.upload.onprogress = function(event) {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        statusDiv.textContent = `Uploading: ${percentComplete}%`;
+      }
+    };
+
+    // Send the request with the FormData object
+    xhr.send(formData);
+  }
+</script>
