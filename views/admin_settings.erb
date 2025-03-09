@@ -21,6 +21,18 @@
     </div>
 
     <div class="mt-4">
+      <label for="footer_text">Open Graph Image</label>
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key_og_image" value="site.og_image">
+      <input type="hidden" name="site_settings[][value]" id="site_og_image" value="<%= @settings["site.og_image"] %>">
+      <img src="<%= og_image_path %>" alt="Open Graph Image" id="site_og_image__preview">
+      <input type="file" name="og_image" id="og_image" class="mt-2" id="image_input" accept="image/*">
+      <% if @errors["site.og_image"] %>
+        <small class="text-danger block italic"><%= @errors["site.og_image"] %></small>
+      <% end %>
+      <div id="upload_status" class="mt-2"></div>
+    </div>
+
+    <div class="mt-4">
       <label for="footer_text">Footer text</label>
       <input type="hidden" name="site_settings[][key]" id="site_settings__key_footer_text" value="site.text.footer">
       <input type="text" name="site_settings[][value]" class="block w-full border-b text-monospace" id="site_footer_text" value="<%= @settings["site.text.footer"] %>">
@@ -41,3 +53,73 @@
     <input type="submit" name="commit" value="Save" class="btn--primary mt-4">
   </form>
 </div>
+
+
+<script>
+  const fileInput = document.getElementById('og_image');
+  const ogImageSetting = document.getElementById('site_og_image');
+  const ogImagePreview = document.getElementById('site_og_image__preview');
+  const statusDiv = document.getElementById('upload_status');
+
+  fileInput.addEventListener('change', function(event) {
+    event.preventDefault();
+
+    // Get the selected file
+    const file = event.target.files[0];
+    if (!file) return;
+
+    uploadFile(file);
+  });
+
+  function uploadFile(file) {
+    // Create a FormData object to send the file
+    const formData = new FormData();
+
+    // Add the file to the FormData object
+    // 'file' is the name the server expects for the uploaded file
+    formData.append('file', file);
+
+    // Optional: Add additional data if needed
+    formData.append('filename', file.name);
+
+    // Show upload status
+    statusDiv.textContent = `Uploading ${file.name}...`;
+
+    // Create and configure the XMLHttpRequest object
+    const xhr = new XMLHttpRequest();
+
+    // Configure the request
+    xhr.open('POST', '/admin/upload', true);
+
+    // Set up event handlers
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // Parse and use the response if needed
+        const response = JSON.parse(xhr.responseText);
+        ogImageSetting.value = response.path
+        ogImagePreview.src = response.path
+        statusDiv.textContent = ''
+      } else {
+        statusDiv.style.color = 'red';
+        statusDiv.textContent = `Upload failed. Server returned ${xhr.status}: ${xhr.statusText}`;
+      }
+      fileInput.value = '';
+    };
+
+    xhr.onerror = function() {
+      statusDiv.style.color = 'red';
+      statusDiv.textContent = 'Upload failed due to network error';
+    };
+
+    // Optional: Track upload progress
+    xhr.upload.onprogress = function(event) {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        statusDiv.textContent = `Uploading: ${percentComplete}%`;
+      }
+    };
+
+    // Send the request with the FormData object
+    xhr.send(formData);
+  }
+</script>

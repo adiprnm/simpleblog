@@ -31,5 +31,9 @@ db.execute <<-SQL
   INSERT INTO settings (id, key, value) VALUES (4, 'site.text.footer', 'Written by human. Grab the [RSS Feed](/feed.xml)')
   ON CONFLICT DO NOTHING;
 SQL
+db.execute <<-SQL
+  INSERT INTO settings (id, key, value) VALUES (5, 'site.og_image', null)
+  ON CONFLICT DO NOTHING;
+SQL
 
 db.close
