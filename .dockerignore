@@ -1,4 +1,5 @@
 storage/uploads/*
-storage/*
-!.gitkeep
+!storage/uploads/.gitkeep
 
+storage/*
+!storage/.gitkeep
