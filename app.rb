@@ -456,10 +456,11 @@ end
 get '/admin/stats' do
   authorize!
   @site = { 'title' => 'Stats' }
-  params['period'] ||= 'last_fourteen_days'
+  params['period'] ||= 'today'
   db = create_database_connection
   @ends = Date.today
   hash = {
+    'today' => Date.today,
     'last_seven_days' => Date.today - 7,
     'last_fourteen_days' => Date.today - 14,
     'last_thirty_days' => Date.today - 30
