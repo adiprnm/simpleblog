@@ -575,6 +575,18 @@ get '/:slug/hit' do
   end
 end
 
+get '/admin/customize' do
+  @site = { 'title' => 'Customize' }
+  erb :admin_customize, layout: :admin_layout
+end
+
+patch '/admin/customize' do
+  db = create_database_connection
+  db.execute("UPDATE settings SET value = ? WHERE key = 'site.custom_css'", params['css'])
+  db.close
+  redirect '/admin/customize'
+end
+
 get '/:slug' do
   db = create_database_connection
   @post = db.execute('SELECT title, slug, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first

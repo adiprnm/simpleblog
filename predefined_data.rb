@@ -35,5 +35,9 @@ db.execute <<-SQL
   INSERT INTO settings (id, key, value) VALUES (5, 'site.og_image', null)
   ON CONFLICT DO NOTHING;
 SQL
+db.execute <<-SQL
+  INSERT INTO settings (id, key, value) VALUES (6, 'site.custom_css', null)
+  ON CONFLICT DO NOTHING;
+SQL
 
 db.close

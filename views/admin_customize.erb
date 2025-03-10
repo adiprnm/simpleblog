@@ -1,0 +1,11 @@
+<div class="mt-8">
+  <h3>Customize</h3>
+  <form action="/admin/customize" method="post">
+    <input type="hidden" name="_method" id="_method" value="patch">
+
+    <label for="css">CSS</label>
+    <textarea id="css" name="css" class="text-sm mt-4" style="line-height: 1.5" placeholder="Put your custom CSS here"><%= site_settings['site.custom_css'] %></textarea>
+
+    <button type="submit" class="btn btn--primary mt-4 mr-2">Save</button>
+  </form>
+</div>
