@@ -60,6 +60,7 @@ def migrate!
     date DATE,
     entry_name TEXT,
     entry_path TEXT,
+    visitor_id TEXT,
     UNIQUE(visit_hash)
   )
   SQL

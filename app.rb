@@ -477,43 +477,47 @@ get '/admin/stats' do
     GROUP BY entry_id, date
   SQL
   @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    WITH referers AS (
+      SELECT visit_hash, referer FROM visits
+      WHERE date BETWEEN :starts AND :ends
+    )
     SELECT
       COALESCE(referer, 'Direct') AS title,
-      COUNT(referer) AS count
-    FROM visits
-    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
-    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
-    WHERE date BETWEEN :starts AND :ends
+      COUNT(visit_hash) AS count
+    FROM referers
     GROUP BY referer
   SQL
   @visits_by_country = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    WITH countries AS (
+      SELECT DISTINCT visitor_id, country FROM visits
+      WHERE date BETWEEN :starts AND :ends
+    )
     SELECT
       COALESCE(country, 'Unknown') AS title,
-      COUNT(*) AS count
-    FROM visits
-    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
-    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
-    WHERE date BETWEEN :starts AND :ends
+      COUNT(visitor_id) AS count
+    FROM countries
     GROUP BY country
   SQL
   @visits_by_device = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    WITH devices AS (
+      SELECT DISTINCT visitor_id, device FROM visits
+      WHERE date BETWEEN :starts AND :ends
+    )
     SELECT
       COALESCE(device, 'Unknown') AS title,
-      COUNT(device) AS count
-    FROM visits
-    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
-    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
-    WHERE date BETWEEN :starts AND :ends
+      COUNT(visitor_id) AS count
+    FROM devices
     GROUP BY device
   SQL
   @visits_by_browser = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    WITH browsers AS (
+      SELECT DISTINCT visitor_id, browser FROM visits
+      WHERE date BETWEEN :starts AND :ends
+    )
     SELECT
       COALESCE(browser, 'Unknown') AS title,
-      COUNT(browser) AS count
-    FROM visits
-    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
-    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
-    WHERE date BETWEEN :starts AND :ends
+      COUNT(visitor_id) AS count
+    FROM browsers
     GROUP BY browser
   SQL
   db.close
@@ -546,6 +550,7 @@ get '/:slug/hit' do
       port = [80, 443].include?(request.port) ? '' : ":#{uri.port}"
       referer = "#{uri.scheme}://#{uri.host}#{port}/"
     end
+    visitor_id = Digest::SHA256.hexdigest request.ip
     visit_hash = Digest::SHA256.hexdigest [entry['id'], date, request.ip].join('-')
     visit_params = {
       'entry_id' => entry['id'],
@@ -557,7 +562,8 @@ get '/:slug/hit' do
       'country' => geoip_db.lookup(request.ip)&.country&.name,
       'referer' => referer,
       'visit_hash' => visit_hash,
-      'date' => date
+      'date' => date,
+      'visitor_id' => visitor_id
     }
     fields = visit_params.keys.join(', ')
     values = visit_params.values.size.times.map { '?' }.join(', ')
