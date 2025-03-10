@@ -69,7 +69,7 @@
 <body>
   <main class="container px-4">
     <h1><%= site_settings["site.title"] %></h1>
-    <nav>
+    <nav class="leading-loose">
       <% navlinks.each do |link| %>
         <a class="inline-block mr-2" href="<%= link["url"] %>"><%= link["name"] %></a>
       <% end %>
