@@ -47,6 +47,23 @@ def migrate!
   );
   SQL
 
+  db.execute <<-SQL
+  CREATE TABLE IF NOT EXISTS visits (
+    id INTEGER PRIMARY KEY,
+    entry_id INTEGER,
+    entry_type TEXT,
+    browser TEXT,
+    device TEXT,
+    country TEXT,
+    referer TEXT,
+    visit_hash TEXT,
+    date DATE,
+    entry_name TEXT,
+    entry_path TEXT,
+    UNIQUE(visit_hash)
+  )
+  SQL
+
   db.close
 end
 

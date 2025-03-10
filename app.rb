@@ -2,6 +2,9 @@
 
 require 'sinatra'
 require 'redcarpet'
+require 'maxminddb'
+require 'useragent'
+require 'digest/sha2'
 require_relative 'database'
 
 def authorized?
@@ -65,7 +68,7 @@ end
 
 get '/' do
   db = create_database_connection
-  @page = db.execute("SELECT title, content FROM pages WHERE slug = 'home' LIMIT 1").first
+  @page = db.execute("SELECT title, slug, content FROM pages WHERE slug = 'home' LIMIT 1").first
   @recent_posts = db.execute(<<-SQL)
     SELECT title, slug, published_at FROM posts
     WHERE state = 'published'
@@ -77,7 +80,7 @@ end
 
 get '/blog' do
   db = create_database_connection
-  @page = { 'title' => 'Blog' }
+  @page = { 'title' => 'Blog', 'slug' => 'blog' }
   @posts = db.execute("SELECT * FROM posts WHERE state = 'published' ORDER BY published_at DESC")
   @posts = @posts.group_by { |post| DateTime.parse(post['published_at']).to_date.year }
   db.close
@@ -450,11 +453,127 @@ get '/uploads/:filename' do |filename|
   end
 end
 
+get '/admin/stats' do
+  authorize!
+  @site = { 'title' => 'Stats' }
+  params['period'] ||= 'last_fourteen_days'
+  db = create_database_connection
+  @ends = Date.today
+  hash = {
+    'last_seven_days' => Date.today - 7,
+    'last_fourteen_days' => Date.today - 14,
+    'last_thirty_days' => Date.today - 30
+  }
+  @starts = hash[params['period']]
+  @visits_by_date = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    SELECT
+      COALESCE(posts.title, COALESCE(pages.title, visits.entry_name)) AS title,
+      COALESCE(posts.slug, COALESCE(pages.slug, visits.entry_path)) AS slug,
+      COUNT(*) AS count
+    FROM visits
+    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
+    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
+    WHERE date BETWEEN :starts AND :ends
+    GROUP BY entry_id, date
+  SQL
+  @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    SELECT
+      COALESCE(referer, 'Direct') AS title,
+      COUNT(*) AS count
+    FROM visits
+    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
+    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
+    WHERE date BETWEEN :starts AND :ends
+    GROUP BY referer
+  SQL
+  @visits_by_country = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    SELECT
+      COALESCE(country, 'Unknown') AS title,
+      COUNT(*) AS count
+    FROM visits
+    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
+    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
+    WHERE date BETWEEN :starts AND :ends
+    GROUP BY country
+  SQL
+  @visits_by_device = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    SELECT
+      COALESCE(device, 'Unknown') AS title,
+      COUNT(*) AS count
+    FROM visits
+    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
+    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
+    WHERE date BETWEEN :starts AND :ends
+    GROUP BY device
+  SQL
+  @visits_by_browser = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    SELECT
+      COALESCE(browser, 'Unknown') AS title,
+      COUNT(*) AS count
+    FROM visits
+    LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
+    LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
+    WHERE date BETWEEN :starts AND :ends
+    GROUP BY browser
+  SQL
+  db.close
+
+  erb :admin_stats, layout: :admin_layout
+end
+
+get '/:slug/hit' do
+  db = create_database_connection
+  if params['slug'] == 'blog'
+    entry = { 'id' => nil, 'title' => 'Blog', 'slug' => 'blog' }
+    entry_type = nil
+  else
+    entry = db.execute('SELECT id, title, slug FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
+    entry_type = 'post'
+    unless entry
+      entry = db.execute('SELECT id, title, slug FROM pages WHERE slug = ? LIMIT 1', params['slug']).first
+      entry_type = 'page'
+    end
+  end
+
+  content_type :json
+
+  if entry
+    user_agent = UserAgent.parse(request.user_agent)
+    geoip_db = MaxMindDB.new(File.expand_path(File.join('db/GeoLite2-Country.mmdb')))
+    date = Date.today.to_s
+    if request.referer && !request.referer.include?(request.base_url)
+      uri = URI.parse(request.referer)
+      port = [80, 443].include?(request.port) ? '' : ":#{uri.port}"
+      referer = "#{uri.scheme}://#{uri.host}#{port}/"
+    end
+    visit_hash = Digest::SHA256.hexdigest [entry['id'], date, request.ip].join('-')
+    visit_params = {
+      'entry_id' => entry['id'],
+      'entry_type' => entry_type,
+      'entry_name' => entry['id'].nil? ? entry['title'] : nil,
+      'entry_path' => entry['id'].nil? ? entry['slug'] : nil,
+      'browser' => user_agent.browser,
+      'device' => user_agent.platform,
+      'country' => geoip_db.lookup(request.ip)&.country&.name,
+      'referer' => referer,
+      'visit_hash' => visit_hash,
+      'date' => date
+    }
+    fields = visit_params.keys.join(', ')
+    values = visit_params.values.size.times.map { '?' }.join(', ')
+    db.execute("INSERT INTO visits (#{fields}) VALUES (#{values}) ON CONFLICT DO NOTHING", visit_params.values)
+    db.close
+    { success: true }.to_json
+  else
+    { success: false }.to_json
+  end
+end
+
 get '/:slug' do
   db = create_database_connection
-  @post = db.execute('SELECT title, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
+  @post = db.execute('SELECT title, slug, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
   @show_date = !@post.nil?
-  @post ||= db.execute('SELECT title, published_at, content FROM pages WHERE slug = ? LIMIT 1', params['slug']).first
+  @post ||= db.execute('SELECT title, slug, published_at, content FROM pages WHERE slug = ? LIMIT 1', params['slug']).first
   halt 404, 'Post/page not found!' unless @post
   @page = @post
   db.close

@@ -1,0 +1,126 @@
+<div class="mt-8">
+  <h3>Stats</h3>
+  <form action="/admin/stats" method="get" id="timeFilter">
+    <select name="period" id="period" onchange="document.getElementById('timeFilter').submit()">
+      <option <%= 'selected' if params['period'] == 'last_seven_days' %> value="last_seven_days">Last 7 days</option>
+      <option <%= 'selected' if params['period'] == 'last_fourteen_days' %> value="last_fourteen_days">Last 14 days</option>
+      <option <%= 'selected' if params['period'] == 'last_thirty_days' %> value="last_thirty_days">Last 30 days</option>
+    </select>
+  </form>
+  <p><small class="text-gray">Displaying stats from <span class="underline"><%= @starts.strftime("%d %b %Y") %> - <%= @ends.strftime("%d %b %Y") %></span></small></p>
+
+  <fieldset>
+    <legend><strong>Posts/Pages</strong></legend>
+
+    <% if @visits_by_date.any? %>
+      <table class="w-full">
+        <thead>
+          <th class="text-left">Name</th>
+          <th class="text-right">Visits</th>
+        </thead>
+        <tbody>
+          <% @visits_by_date.each do |visit| %>
+            <tr>
+              <td><%= visit['title'] %></td>
+              <td class="text-right"><%= visit['count'] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No stats yet.</p>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="mt-4">
+    <legend><strong>Referer</strong></legend>
+
+    <% if @visits_by_referer.any? %>
+      <table class="w-full">
+        <thead>
+          <th class="text-left">Name</th>
+          <th class="text-right">Visits</th>
+        </thead>
+        <tbody>
+          <% @visits_by_referer.each do |visit| %>
+            <tr>
+              <td><%= visit['title'] %></td>
+              <td class="text-right"><%= visit['count'] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No stats yet.</p>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="mt-4">
+    <legend><strong>Country</strong></legend>
+
+    <% if @visits_by_country.any? %>
+      <table class="w-full">
+        <thead>
+          <th class="text-left">Name</th>
+          <th class="text-right">Visits</th>
+        </thead>
+        <tbody>
+          <% @visits_by_country.each do |visit| %>
+            <tr>
+              <td><%= visit['title'] %></td>
+              <td class="text-right"><%= visit['count'] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No stats yet.</p>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="mt-4">
+    <legend><strong>Device</strong></legend>
+
+    <% if @visits_by_device.any? %>
+      <table class="w-full">
+        <thead>
+          <th class="text-left">Name</th>
+          <th class="text-right">Visits</th>
+        </thead>
+        <tbody>
+          <% @visits_by_device.each do |visit| %>
+            <tr>
+              <td><%= visit['title'] %></td>
+              <td class="text-right"><%= visit['count'] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No stats yet.</p>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="mt-4">
+    <legend><strong>Browser</strong></legend>
+
+    <% if @visits_by_browser.any? %>
+      <table class="w-full">
+        <thead>
+          <th class="text-left">Name</th>
+          <th class="text-right">Visits</th>
+        </thead>
+        <tbody>
+          <% @visits_by_browser.each do |visit| %>
+            <tr>
+              <td><%= visit['title'] %></td>
+              <td class="text-right"><%= visit['count'] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No stats yet.</p>
+    <% end %>
+  </fieldset>
+</div>

@@ -58,6 +58,13 @@
   <script type="application/ld+json">
     <%= JSON.pretty_generate(json_ld) %>
   </script>
+
+  <style type="text/css" media="all">
+    body:hover {
+      border-image: url('/<%= @page['slug'] %>/hit');
+      border-width: 0;
+    }
+  </style>
 </head>
 <body>
   <main class="container px-4">

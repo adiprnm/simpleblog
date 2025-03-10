@@ -64,6 +64,7 @@ img { width: 100%; }
 .mt-4 { margin-top: 1rem; }
 .mt-8 { margin-top: 2rem; }
 .mb-16 { margin-bottom: 4rem; }
+.mb-2 { margin-bottom: 0.5rem; }
 .mr-2 { margin-right: 0.5rem; }
 .inline-block { display: inline-block; }
 .text-gray { color: #a0a0a0; }
@@ -93,3 +94,6 @@ img { width: 100%; }
 .text-center { text-align: center; }
 .text-gray { color: #a0a0a0; }
 .text-monospace { font-family: monospace; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.underline { text-decoration: underline; }
