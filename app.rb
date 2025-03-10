@@ -2,6 +2,7 @@
 
 require 'sinatra'
 require 'redcarpet'
+require 'redcarpet/render_strip'
 require 'maxminddb'
 require 'useragent'
 require 'digest/sha2'
@@ -32,6 +33,11 @@ helpers do
   def render_markdown(text)
     markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
     markdown.render(text)
+  end
+
+  def render_plaintext(text)
+    plaintext = Redcarpet::Markdown.new(Redcarpet::Render::StripDown)
+    plaintext.render(text)
   end
 
   def site_settings
@@ -69,6 +75,8 @@ end
 get '/' do
   db = create_database_connection
   @page = db.execute("SELECT title, slug, content FROM pages WHERE slug = 'home' LIMIT 1").first
+  @page['title'] = site_settings['site.description'] if site_settings['site.description']
+  @page['description'] = render_plaintext(@page['content']).split("\n").first
   @recent_posts = db.execute(<<-SQL)
     SELECT title, slug, published_at FROM posts
     WHERE state = 'published'
@@ -80,7 +88,11 @@ end
 
 get '/blog' do
   db = create_database_connection
-  @page = { 'title' => 'Blog', 'slug' => 'blog' }
+  @page = {
+    'title' => 'Blog',
+    'slug' => 'blog',
+    'description' => 'Blog archive, grouped by year.'
+  }
   @posts = db.execute("SELECT * FROM posts WHERE state = 'published' ORDER BY published_at DESC")
   @posts = @posts.group_by { |post| DateTime.parse(post['published_at']).to_date.year }
   db.close
@@ -594,7 +606,8 @@ get '/:slug' do
   @show_date = !@post.nil?
   @post ||= db.execute('SELECT title, slug, published_at, content FROM pages WHERE slug = ? LIMIT 1', params['slug']).first
   halt 404, 'Post/page not found!' unless @post
-  @page = @post
   db.close
+  @page = @post
+  @page['description'] = render_plaintext(@page['content']).split("\n").first
   erb :post, layout: :layout
 end
