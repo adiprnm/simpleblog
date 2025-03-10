@@ -479,7 +479,7 @@ get '/admin/stats' do
   @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     SELECT
       COALESCE(referer, 'Direct') AS title,
-      COUNT(*) AS count
+      COUNT(referer) AS count
     FROM visits
     LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
     LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
@@ -499,7 +499,7 @@ get '/admin/stats' do
   @visits_by_device = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     SELECT
       COALESCE(device, 'Unknown') AS title,
-      COUNT(*) AS count
+      COUNT(device) AS count
     FROM visits
     LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
     LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
@@ -509,7 +509,7 @@ get '/admin/stats' do
   @visits_by_browser = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     SELECT
       COALESCE(browser, 'Unknown') AS title,
-      COUNT(*) AS count
+      COUNT(browser) AS count
     FROM visits
     LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
     LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
