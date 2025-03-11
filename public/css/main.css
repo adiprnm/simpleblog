@@ -21,10 +21,10 @@ input#title {
 }
 input, select, textarea {
   border: none;
-  background-color: transparent;
   font-size: 1rem;
   &:focus { outline: none; }
 }
+select { background-color: transparent; }
 input {
   font-size: 1rem;
   &:focus { outline: none; }
