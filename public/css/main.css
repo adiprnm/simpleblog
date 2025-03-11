@@ -99,3 +99,4 @@ img { width: 100%; }
 .text-right { text-align: right; }
 .underline { text-decoration: underline; }
 .leading-loose { line-height: 2; }
+.break-word { word-wrap: break-word; }

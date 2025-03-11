@@ -29,7 +29,7 @@
         <tbody>
           <% @visits_by_date.each do |visit| %>
             <tr>
-              <td><%= visit['title'] %></td>
+              <td><a href="/<%= visit['slug'] %>" target="_blank"><%= visit['title'] %></a></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
@@ -52,7 +52,7 @@
         <tbody>
           <% @visits_by_referer.each do |visit| %>
             <tr>
-              <td><%= visit['title'] %></td>
+              <td class="break-word"><%= visit['title'] %></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
