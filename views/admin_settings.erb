@@ -42,6 +42,19 @@
     </div>
 
     <div class="mt-4">
+      <label for="timezone">Timezone</label>
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key_timezone" value="site.timezone_offset">
+      <select name="site_settings[][value]" class="block w-full border-b" id="timezone">
+        <% @timezone_offsets.each do |name, offset| %>
+          <option value="<%= offset %>" <%= @settings["site.timezone_offset"] == offset ? "selected" : "" %>><%= name %></option>
+        <% end %>
+      </select>
+      <% if @errors["site.timezone_offset"] %>
+        <small class="text-danger block italic"><%= @errors["site.timezone_offset"] %></small>
+      <% end %>
+    </div>
+
+    <div class="mt-4">
       <label for="site_name">Twitter username</label>
       <input type="hidden" name="site_settings[][key]" id="site_settings__key" value="site.twitter.username">
       <input type="text" name="site_settings[][value]" class="block w-full border-b" id="twitter_username" value="<%= @settings["site.twitter.username"] %>">

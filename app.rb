@@ -6,6 +6,7 @@ require 'redcarpet/render_strip'
 require 'maxminddb'
 require 'useragent'
 require 'digest/sha2'
+require 'yaml'
 require_relative 'database'
 
 def authorized?
@@ -405,6 +406,7 @@ get '/admin/settings' do
   @site = { 'title' => 'Settings' }
   @errors = {}
   @settings = site_settings
+  @timezone_offsets = YAML.load_file('tzoffset.yml')
   erb :admin_settings, layout: :admin_layout
 end
 
@@ -470,12 +472,12 @@ get '/admin/stats' do
   @site = { 'title' => 'Stats' }
   params['period'] ||= 'today'
   db = create_database_connection
-  @ends = Date.today
+  @ends = Time.now.getlocal(site_settings['site.timezone_offset']).to_date
   hash = {
-    'today' => Date.today,
-    'last_seven_days' => Date.today - 7,
-    'last_fourteen_days' => Date.today - 14,
-    'last_thirty_days' => Date.today - 30
+    'today' => @ends,
+    'last_seven_days' => @ends - 7,
+    'last_fourteen_days' => @ends - 14,
+    'last_thirty_days' => @ends - 30
   }
   @starts = hash[params['period']]
   @visits_by_date = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
