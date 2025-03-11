@@ -559,7 +559,7 @@ get '/:slug/hit' do
     geoip_db = MaxMindDB.new(File.expand_path(File.join('db/GeoLite2-Country.mmdb')))
     date = Date.today.to_s
     referer = params['ref']
-    referer = nil if referer.to_s.include?(request.base_url)
+    referer = nil if referer.to_s.include?(request.base_url) || referer.to_s.empty?
     if referer
       uri = URI.parse(referer)
       port = ":#{uri.port}" if uri.port && ![80, 443].include?(uri.port)
