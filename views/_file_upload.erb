@@ -9,6 +9,17 @@
   const statusDiv = document.getElementById('status');
   const content = document.getElementById('content');
 
+  content.addEventListener('paste', function(event) {
+    event.preventDefault();
+    const items = event.clipboardData.items;
+    for (const item of items) {
+      if (item.kind === 'file' && item.type.indexOf('image/') === 0) {
+        const file = item.getAsFile();
+        uploadFile(file);
+      }
+    }
+  });
+
   fileInput.addEventListener('change', function(event) {
     // Get the selected file
     const file = event.target.files[0];
