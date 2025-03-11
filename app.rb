@@ -558,10 +558,12 @@ get '/:slug/hit' do
     user_agent = UserAgent.parse(request.user_agent)
     geoip_db = MaxMindDB.new(File.expand_path(File.join('db/GeoLite2-Country.mmdb')))
     date = Date.today.to_s
-    if request.referer && !request.referer.include?(request.base_url)
-      uri = URI.parse(request.referer)
-      port = [80, 443].include?(request.port) ? '' : ":#{uri.port}"
-      referer = "#{uri.scheme}://#{uri.host}#{port}/"
+    referer = params['ref']
+    referer = nil if referer.to_s.include?(request.base_url)
+    if referer
+      uri = URI.parse(referer)
+      port = ":#{uri.port}" if uri.port && ![80, 443].include?(uri.port)
+      referer = "#{uri.scheme}://#{uri.host}#{port}/" if port
     end
     visitor_id = Digest::SHA256.hexdigest request.ip
     visit_hash = Digest::SHA256.hexdigest [entry['id'], date, request.ip].join('-')

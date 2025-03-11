@@ -61,7 +61,7 @@
 
   <style type="text/css" media="all">
     body:hover {
-      border-image: url('/<%= @page['slug'] %>/hit');
+      border-image: url('/<%= @page['slug'] %>/hit?ref=<%= request.referer %>');
       border-width: 0;
     }
 
