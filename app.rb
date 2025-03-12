@@ -489,7 +489,7 @@ get '/admin/stats' do
     LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
     LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
     WHERE date BETWEEN :starts AND :ends
-    GROUP BY entry_id, date
+    GROUP BY entry_id
   SQL
   @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH referers AS (
