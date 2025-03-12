@@ -440,6 +440,7 @@ put '/admin/settings' do
 end
 
 post '/admin/upload' do
+  authorize!
   content_type :json
 
   upload = params['file']
