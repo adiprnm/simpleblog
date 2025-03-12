@@ -9,7 +9,7 @@
         "last_thirty_days" => "Last 30 days"
       }
     %>
-    <select name="period" id="period" onchange="document.getElementById('timeFilter').submit()">
+    <select name="period" id="period" class="border-b" onchange="document.getElementById('timeFilter').submit()">
       <% options.each do |type, text| %>
         <option <%= 'selected' if params['period'] == type %> value="<%= type %>"><%= text %></option>
       <% end %>
