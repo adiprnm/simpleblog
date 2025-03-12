@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><%= site_settings['site.title'] %></title>
+  <link href="<%= request.base_url %>"/>
+  <updated><%= @posts.first['published_at'] %></updated>
+  <% @posts.each do |post| %>
+  <entry>
+    <id><%= request.base_url %>/<%= post['slug'] %></id>
+    <title><%= post['title'] %></title>
+    <link rel="alternate" href="<%= request.base_url %>/<%= post['slug'] %>"/>
+    <published><%= post['published_at'] %></published>
+    <updated><%= post['updated_at'] %></updated>
+    <summary><%= summary(post['content']) %></summary>
+    <content type="html"><%= CGI::escapeHTML(render_markdown(post['content'])) %></content>
+  </entry>
+  <% end %>
+</feed>

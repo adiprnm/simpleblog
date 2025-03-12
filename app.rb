@@ -71,6 +71,10 @@ helpers do
   def deployment_id
     File.read('deployment_id').chomp
   end
+
+  def summary(text)
+    render_plaintext(text).split("\n").first
+  end
 end
 
 get '/' do
@@ -605,6 +609,14 @@ patch '/admin/customize' do
   redirect '/admin/customize'
 end
 
+get '/feed.xml' do
+  db = create_database_connection
+  @posts = db.execute('SELECT title, slug, updated_at, published_at, content FROM posts WHERE state = "published" ORDER BY published_at DESC LIMIT 6')
+  db.close
+  content_type :xml
+  erb :feed_xml, layout: false
+end
+
 get '/:slug' do
   db = create_database_connection
   @post = db.execute('SELECT title, slug, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
@@ -613,6 +625,6 @@ get '/:slug' do
   halt 404, 'Post/page not found!' unless @post
   db.close
   @page = @post
-  @page['description'] = render_plaintext(@page['content']).split("\n").first
+  @page['description'] = summary(@page['content'])
   erb :post, layout: :layout
 end
