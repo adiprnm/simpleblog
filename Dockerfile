@@ -20,6 +20,9 @@ COPY --from=builder /usr/local/bundle /usr/local/bundle
 # Copy the application code
 COPY . .
 
+# Install ImageMagick
+RUN apt-get update && apt-get install -y imagemagick
+
 # Set the deployment ID for asset caching
 RUN date +%s > deployment_id
 

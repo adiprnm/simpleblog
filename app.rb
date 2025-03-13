@@ -7,6 +7,7 @@ require 'maxminddb'
 require 'useragent'
 require 'digest/sha2'
 require 'yaml'
+require 'mini_magick'
 require_relative 'database'
 
 def authorized?
@@ -447,19 +448,33 @@ post '/admin/upload' do
   authorize!
   content_type :json
 
-  upload = params['file']
-  if upload
-    filename = "#{SecureRandom.uuid}.#{upload[:filename].split('.').last}"
-    filepath = File.join(settings.upload_folder, filename)
-    server_path = File.join(request.base_url, 'uploads', filename)
-    File.open(filepath, 'wb') do |f|
-      f.write(upload['tempfile'].read)
-    end
-    { success: true, path: server_path, filename: upload[:filename] }.to_json
-  else
+  file = params['file']
+  unless file
     status 400
-    { success: false, message: 'No file uploaded' }.to_json
+    return { success: false, message: 'No file uploaded' }.to_json
   end
+
+  file_extension = file[:filename].split('.').last.downcase
+
+  if file_extension != 'gif'
+    filename = "#{SecureRandom.uuid}.webp"
+    filepath = File.join(settings.upload_folder, filename)
+
+    image = MiniMagick::Image.open(file[:tempfile].path)
+    image.resize '1920x1080'
+    image.format 'webp'
+    image.write filepath
+  else
+    filename = "#{SecureRandom.uuid}.#{file_extension}"
+    filepath = File.join(settings.upload_folder, filename)
+    File.open(filepath, 'wb') do |f|
+      f.write(file[:tempfile].read)
+    end
+  end
+
+  server_path = File.join(request.base_url, 'uploads', filename)
+
+  { success: true, path: server_path, filename: file[:filename] }.to_json
 end
 
 get '/uploads/:filename' do |filename|
@@ -495,7 +510,7 @@ get '/admin/stats' do
     LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
     WHERE date BETWEEN :starts AND :ends
     GROUP BY entry_id
-    ORDER BY count DESC
+    ORDER BY count DESC, title ASC
   SQL
   @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH referers AS (
@@ -507,7 +522,7 @@ get '/admin/stats' do
       COUNT(visit_hash) AS count
     FROM referers
     GROUP BY referer
-    ORDER BY count DESC
+    ORDER BY count DESC, title ASC
   SQL
   @visits_by_country = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH countries AS (
@@ -519,7 +534,7 @@ get '/admin/stats' do
       COUNT(visitor_id) AS count
     FROM countries
     GROUP BY country
-    ORDER BY count DESC
+    ORDER BY count DESC, title ASC
   SQL
   @visits_by_device = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH devices AS (
@@ -531,7 +546,7 @@ get '/admin/stats' do
       COUNT(visitor_id) AS count
     FROM devices
     GROUP BY device
-    ORDER BY count DESC
+    ORDER BY count DESC, title ASC
   SQL
   @visits_by_browser = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH browsers AS (
@@ -543,7 +558,7 @@ get '/admin/stats' do
       COUNT(visitor_id) AS count
     FROM browsers
     GROUP BY browser
-    ORDER BY count DESC
+    ORDER BY count DESC, title ASC
   SQL
   db.close
 
