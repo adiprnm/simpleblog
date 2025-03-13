@@ -24,6 +24,24 @@ input, select, textarea {
   font-size: 1rem;
   &:focus { outline: none; }
 }
+select#period {
+  border: 1px solid #dfdfdf;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+}
+p code {
+  background-color: #f1f1f1; /* light gray */
+  border-radius: 3px;
+  padding: 2px 4px;
+}
+img + em {
+  display: block;
+  margin-top: 4px;
+  text-align: center;
+  font-size: 14px;
+  color: #666; /* gray */
+  font-style: italic;
+}
 select { background-color: transparent; }
 input {
   font-size: 1rem;
