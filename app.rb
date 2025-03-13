@@ -495,6 +495,7 @@ get '/admin/stats' do
     LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
     WHERE date BETWEEN :starts AND :ends
     GROUP BY entry_id
+    ORDER BY count DESC
   SQL
   @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH referers AS (
@@ -506,6 +507,7 @@ get '/admin/stats' do
       COUNT(visit_hash) AS count
     FROM referers
     GROUP BY referer
+    ORDER BY count DESC
   SQL
   @visits_by_country = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH countries AS (
@@ -517,6 +519,7 @@ get '/admin/stats' do
       COUNT(visitor_id) AS count
     FROM countries
     GROUP BY country
+    ORDER BY count DESC
   SQL
   @visits_by_device = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH devices AS (
@@ -528,6 +531,7 @@ get '/admin/stats' do
       COUNT(visitor_id) AS count
     FROM devices
     GROUP BY device
+    ORDER BY count DESC
   SQL
   @visits_by_browser = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH browsers AS (
@@ -539,6 +543,7 @@ get '/admin/stats' do
       COUNT(visitor_id) AS count
     FROM browsers
     GROUP BY browser
+    ORDER BY count DESC
   SQL
   db.close
 
