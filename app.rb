@@ -218,15 +218,19 @@ put '/admin/posts/:id' do
 
   # Get existing tags for the post
   existing_tags = db.execute('SELECT name FROM tags WHERE taggable_type = ? AND taggable_id = ?', ['post', params['id']]).map { |tag| tag['name'] }
+  tags_to_remove = existing_tags - tags
 
   # Remove tags that are no longer in the content
-  tags_to_remove = existing_tags - tags
-  db.execute('DELETE FROM tags WHERE name IN (?) AND taggable_type = ? AND taggable_id = ?', [tags_to_remove, 'post', params['id']])
+  if tags_to_remove.any?
+    db.execute('DELETE FROM tags WHERE name IN (?) AND taggable_type = ? AND taggable_id = ?', [tags_to_remove, 'post', params['id']])
+  end
 
   # Insert new tags
-  insert_query = tags.flat_map { |tag| [tag, 'post', params['id']] }
-  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
-  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+  if tags.any?
+    insert_query = tags.flat_map { |tag| [tag, 'post', params['id']] }
+    insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+    db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+  end
 
   db.close
   redirect '/admin/posts'
@@ -343,18 +347,18 @@ put '/admin/pages/:id' do
 
   # Parse tags from content using a regex pattern for hashtags
   tags = params['content'].scan(/#\w+/).map { |tag| tag.delete('#').strip }.uniq
-
-  # Get existing tags for the page
   existing_tags = db.execute('SELECT name FROM tags WHERE taggable_type = ? AND taggable_id = ?', ['page', params['id']]).map { |tag| tag['name'] }
-
-  # Remove tags that are no longer in the content
   tags_to_remove = existing_tags - tags
-  db.execute('DELETE FROM tags WHERE name IN (?) AND taggable_type = ? AND taggable_id = ?', [tags_to_remove, 'page', params['id']])
-
-  # Insert new tags
-  insert_query = tags.flat_map { |tag| [tag, 'page', params['id']] }
-  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
-  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+  if tags_to_remove.any?
+    # Remove tags that are no longer in the content
+    db.execute('DELETE FROM tags WHERE name IN (?) AND taggable_type = ? AND taggable_id = ?', [tags_to_remove, 'page', params['id']])
+  end
+  if tags.any?
+    # Insert new tags
+    insert_query = tags.flat_map { |tag| [tag, 'page', params['id']] }
+    insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+    db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+  end
 
   db.close
   redirect '/admin/pages'
@@ -665,10 +669,10 @@ get %r{/(.+)/hit} do |slug|
     entry = { 'id' => nil, 'title' => "##{slug.sub(%r{^tags/}, '')}", 'slug' => slug }
     entry_type = nil
   else
-    entry = db.execute('SELECT id, title, slug FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
+    entry = db.execute('SELECT id, title, slug FROM posts WHERE slug = ? LIMIT 1', slug).first
     entry_type = 'post'
     unless entry
-      entry = db.execute('SELECT id, title, slug FROM pages WHERE slug = ? LIMIT 1', params['slug']).first
+      entry = db.execute('SELECT id, title, slug FROM pages WHERE slug = ? LIMIT 1', slug).first
       entry_type = 'page'
     end
   end
@@ -711,7 +715,7 @@ get %r{/(.+)/hit} do |slug|
   end
 end
 
-get '/ ||in/customize' do
+get '/admin/customize' do
   @site = { 'title' => 'Customize' }
   erb :admin_customize, layout: :admin_layout
 end

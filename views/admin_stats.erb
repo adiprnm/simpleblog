@@ -33,7 +33,7 @@
         <tbody>
           <% @visits_by_entry.each do |visit| %>
             <tr>
-              <td><a href="/<%= visit['slug'] %>" target="_blank"><%= visit['title'] %></a></td>
+              <td class="stats-title"><a href="/<%= visit['slug'] %>" target="_blank"><%= visit['title'] %></a></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
@@ -56,7 +56,7 @@
         <tbody>
           <% @visits_by_referer.each do |visit| %>
             <tr>
-              <td class="break-word"><%= visit['title'] %></td>
+              <td class="stats-title"><%= visit['title'] %></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
@@ -79,7 +79,7 @@
         <tbody>
           <% @visits_by_country.each do |visit| %>
             <tr>
-              <td><%= visit['title'] %></td>
+              <td class="stats-title"><%= visit['title'] %></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
@@ -102,7 +102,7 @@
         <tbody>
           <% @visits_by_device.each do |visit| %>
             <tr>
-              <td><%= visit['title'] %></td>
+              <td class="stats-title"><%= visit['title'] %></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
@@ -125,7 +125,7 @@
         <tbody>
           <% @visits_by_browser.each do |visit| %>
             <tr>
-              <td><%= visit['title'] %></td>
+              <td class="stats-title"><%= visit['title'] %></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
