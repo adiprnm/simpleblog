@@ -18,3 +18,5 @@ gem "maxminddb", "~> 0.1.22"
 gem "useragent", "~> 0.16.11"
 
 gem "mini_magick", "~> 5.2"
+
+gem "sinatra-contrib", "~> 4.1"

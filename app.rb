@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'sinatra'
+require 'sinatra/contrib'
 require 'redcarpet'
 require 'redcarpet/render_strip'
 require 'maxminddb'
@@ -552,12 +553,30 @@ get '/admin/stats' do
   @ends = Time.now.getlocal(site_settings['site.timezone_offset']).to_date
   hash = {
     'today' => @ends,
-    'last_seven_days' => @ends - 7,
-    'last_fourteen_days' => @ends - 14,
-    'last_thirty_days' => @ends - 30
+    'last_seven_days' => @ends - 6,
+    'last_fourteen_days' => @ends - 13,
+    'last_thirty_days' => @ends - 29
   }
   @starts = hash[params['period']]
   @visits_by_date = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
+    SELECT
+      date,
+      COUNT(*) AS count
+    FROM visits
+    WHERE date BETWEEN :starts AND :ends
+    GROUP BY date
+    ORDER BY date ASC
+  SQL
+  starts = params['period'] == 'today' ? @ends - 3 : @starts 
+  labels = (starts..@ends).map { |date| date.strftime("%b %d '%y") }
+  data = (starts..@ends).map { |date| @visits_by_date.find { |v| v['date'] == date.to_s }&.dig('count') || 0 }
+  @chart_data = {
+    labels: labels,
+    datasets: [
+      { label: "Visits", data: data, borderWidth: 1 }
+    ]
+  }.to_json
+  @visits_by_entry = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     SELECT
       COALESCE(posts.title, COALESCE(pages.title, visits.entry_name)) AS title,
       COALESCE(posts.slug, COALESCE(pages.slug, visits.entry_path)) AS slug,

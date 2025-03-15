@@ -17,17 +17,19 @@
   </form>
   <p><small class="text-gray">Displaying stats from <span class="underline"><%= @starts.strftime("%d %b %Y") %> - <%= @ends.strftime("%d %b %Y") %></span></small></p>
 
+  <canvas id="visits-chart"></canvas>
+
   <fieldset>
     <legend><strong>Posts/Pages</strong></legend>
 
-    <% if @visits_by_date.any? %>
+    <% if @visits_by_entry.any? %>
       <table class="w-full">
         <thead>
           <th class="text-left">Name</th>
           <th class="text-right">Visits</th>
         </thead>
         <tbody>
-          <% @visits_by_date.each do |visit| %>
+          <% @visits_by_entry.each do |visit| %>
             <tr>
               <td><a href="/<%= visit['slug'] %>" target="_blank"><%= visit['title'] %></a></td>
               <td class="text-right"><%= visit['count'] %></td>
@@ -132,3 +134,29 @@
     <% end %>
   </fieldset>
 </div>
+
+<% content_for :head do %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<% end %>
+
+<script>
+  const ctx = document.getElementById('visits-chart');
+  const data = JSON.parse(`<%= @chart_data %>`) 
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: data,
+    options: {
+      scales: {
+        y: {
+          ticks: {
+            stepSize: 1, // Force step intervals to be 1
+            callback: function(value) {
+              return Number.isInteger(value) ? value : null; // Show only integers
+            }
+          }
+        }
+      }
+    }
+  });
+</script>

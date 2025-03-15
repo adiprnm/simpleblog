@@ -21,6 +21,7 @@ GEM
     mini_magick (5.2.0)
       benchmark
       logger
+    multi_json (1.15.0)
     mustermann (3.0.3)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.7.4)
@@ -49,6 +50,12 @@ GEM
       rack (>= 3.0.0, < 4)
       rack-protection (= 4.1.1)
       rack-session (>= 2.0.0, < 3)
+      tilt (~> 2.0)
+    sinatra-contrib (4.1.1)
+      multi_json (>= 0.0.2)
+      mustermann (~> 3.0)
+      rack-protection (= 4.1.1)
+      sinatra (= 4.1.1)
       tilt (~> 2.0)
     sqlite3 (2.6.0-aarch64-linux-gnu)
     sqlite3 (2.6.0-aarch64-linux-musl)
@@ -83,6 +90,7 @@ DEPENDENCIES
   redcarpet (~> 3.6)
   rerun
   sinatra (~> 4.1)
+  sinatra-contrib (~> 4.1)
   sqlite3 (~> 2.6)
   useragent (~> 0.16.11)
 
