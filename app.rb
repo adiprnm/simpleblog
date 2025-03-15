@@ -567,9 +567,24 @@ get '/admin/stats' do
     GROUP BY date
     ORDER BY date ASC
   SQL
-  starts = params['period'] == 'today' ? @ends - 3 : @starts 
+
+  if params['period'] == 'today'
+    starts = @starts - 3
+    visits_by_date = db.execute(<<-SQL, starts: starts.to_s, ends: @ends.to_s)
+      SELECT
+        date,
+        COUNT(*) AS count
+      FROM visits
+      WHERE date BETWEEN :starts AND :ends
+      GROUP BY date
+      ORDER BY date ASC
+    SQL
+  else
+    starts = @starts
+    visits_by_date = @visits_by_date
+  end
   labels = (starts..@ends).map { |date| date.strftime("%b %d '%y") }
-  data = (starts..@ends).map { |date| @visits_by_date.find { |v| v['date'] == date.to_s }&.dig('count') || 0 }
+  data = (starts..@ends).map { |date| visits_by_date.find { |v| v['date'] == date.to_s }&.dig('count') || 0 }
   @chart_data = {
     labels: labels,
     datasets: [

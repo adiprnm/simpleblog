@@ -17,9 +17,11 @@
   </form>
   <p><small class="text-gray">Displaying stats from <span class="underline"><%= @starts.strftime("%d %b %Y") %> - <%= @ends.strftime("%d %b %Y") %></span></small></p>
 
-  <canvas id="visits-chart"></canvas>
+  <div class="mt-8" style="height: 250px;">
+    <canvas id="visits-chart"></canvas>
+  </div>
 
-  <fieldset>
+  <fieldset class="mt-8">
     <legend><strong>Posts/Pages</strong></legend>
 
     <% if @visits_by_entry.any? %>
@@ -156,7 +158,9 @@
             }
           }
         }
-      }
+      },
+      responsive: true,
+      maintainAspectRatio: false // Allow custom height
     }
   });
 </script>
