@@ -34,6 +34,9 @@
   %>
 
   <title><%= title %> | <%= site_settings["site.title"] %></title>
+  <% if @page['noindex'] %>
+    <meta name="robots" content="noindex" />
+  <% end %>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="og:title" content="<%= title %>">
   <meta name="author" content="<%= title %>">

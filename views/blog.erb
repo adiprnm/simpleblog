@@ -14,3 +14,12 @@
     <% end %>
   </div>
 </div>
+
+<div class="mt-8">
+  <h2>Hashtags</h2>
+  <div class="flex flex-wrap gap-2">
+    <% @hashtags.each do |hashtag| %>
+      <a href="/tags/<%= hashtag['name'] %>">#<%= hashtag['name'] %></a>
+    <% end %>
+  </div>
+</div>

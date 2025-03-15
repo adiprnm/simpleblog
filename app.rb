@@ -33,6 +33,10 @@ set :upload_folder, "#{__dir__}/storage/uploads"
 
 helpers do
   def render_markdown(text)
+    text = text.gsub(/#(\w+)/) do |match|
+      "[#{match}](/tags/#{Regexp.last_match(1)})"
+    end
+    
     markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
     markdown.render(text)
   end
@@ -101,6 +105,7 @@ get '/blog' do
   }
   @posts = db.execute("SELECT * FROM posts WHERE state = 'published' ORDER BY published_at DESC")
   @posts = @posts.group_by { |post| DateTime.parse(post['published_at']).to_date.year }
+  @hashtags = db.execute('SELECT DISTINCT name FROM tags ORDER BY name ASC')
   db.close
   erb :blog, layout: :layout
 end
@@ -148,6 +153,16 @@ post '/admin/posts' do
     'INSERT INTO posts (title, content, slug, state, published_at) VALUES (?, ?, ?, ?, ?)',
     [params['title'], params['content'], slug, state, published_at]
   )
+  post_id = db.last_insert_row_id
+
+  # Parse tags from content using a regex pattern for hashtags
+  tags = params['content'].scan(/#\w+/).map { |tag| tag.delete('#').strip }.uniq
+  insert_query = tags.flat_map { |tag| [tag, 'post', post_id] }
+  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+
+  # Insert tags directly without checking for existing ones
+  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+
   db.close
   redirect '/admin/posts'
 end
@@ -196,6 +211,22 @@ put '/admin/posts/:id' do
     "UPDATE posts SET #{to_be_updated_fields.map { |f| "#{f} = ?" }.join(', ')}, updated_at = time('now') WHERE id = ?",
     to_be_updated_values
   )
+
+  # Parse tags from content using a regex pattern for hashtags
+  tags = params['content'].scan(/#\w+/).map { |tag| tag.delete('#').strip }.uniq
+
+  # Get existing tags for the post
+  existing_tags = db.execute('SELECT name FROM tags WHERE taggable_type = ? AND taggable_id = ?', ['post', params['id']]).map { |tag| tag['name'] }
+
+  # Remove tags that are no longer in the content
+  tags_to_remove = existing_tags - tags
+  db.execute('DELETE FROM tags WHERE name IN (?) AND taggable_type = ? AND taggable_id = ?', [tags_to_remove, 'post', params['id']])
+
+  # Insert new tags
+  insert_query = tags.flat_map { |tag| [tag, 'post', params['id']] }
+  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+
   db.close
   redirect '/admin/posts'
 end
@@ -249,6 +280,16 @@ post '/admin/pages' do
     'INSERT INTO pages (title, content, state, published_at, slug) VALUES (?, ?, ?, ?, ?)',
     [params['title'], params['content'], state, published_at, slug]
   )
+  page_id = db.last_insert_row_id
+
+  # Parse tags from content using a regex pattern for hashtags
+  tags = params['content'].scan(/#\w+/).map { |tag| tag.delete('#').strip }.uniq
+  insert_query = tags.flat_map { |tag| [tag, 'page', page_id] }
+  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+
+  # Insert tags directly without checking for existing ones
+  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+
   db.close
   redirect '/admin/pages'
 end
@@ -298,6 +339,22 @@ put '/admin/pages/:id' do
     "UPDATE pages SET #{to_be_updated_fields.map { |f| "#{f} = ?" }.join(', ')}, updated_at = time('now') WHERE id = ?",
     to_be_updated_values
   )
+
+  # Parse tags from content using a regex pattern for hashtags
+  tags = params['content'].scan(/#\w+/).map { |tag| tag.delete('#').strip }.uniq
+
+  # Get existing tags for the page
+  existing_tags = db.execute('SELECT name FROM tags WHERE taggable_type = ? AND taggable_id = ?', ['page', params['id']]).map { |tag| tag['name'] }
+
+  # Remove tags that are no longer in the content
+  tags_to_remove = existing_tags - tags
+  db.execute('DELETE FROM tags WHERE name IN (?) AND taggable_type = ? AND taggable_id = ?', [tags_to_remove, 'page', params['id']])
+
+  # Insert new tags
+  insert_query = tags.flat_map { |tag| [tag, 'page', params['id']] }
+  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+
   db.close
   redirect '/admin/pages'
 end
@@ -509,7 +566,7 @@ get '/admin/stats' do
     LEFT JOIN posts ON visits.entry_id = posts.id AND visits.entry_type = 'post'
     LEFT JOIN pages ON visits.entry_id = pages.id AND visits.entry_type = 'page'
     WHERE date BETWEEN :starts AND :ends
-    GROUP BY entry_id
+    GROUP BY entry_id, COALESCE(posts.slug, COALESCE(pages.slug, visits.entry_path))
     ORDER BY count DESC, title ASC
   SQL
   @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
@@ -565,10 +622,13 @@ get '/admin/stats' do
   erb :admin_stats, layout: :admin_layout
 end
 
-get '/:slug/hit' do
+get %r{/(.+)/hit} do |slug|
   db = create_database_connection
-  if params['slug'] == 'blog'
+  if slug == 'blog'
     entry = { 'id' => nil, 'title' => 'Blog', 'slug' => 'blog' }
+    entry_type = nil
+  elsif slug =~ %r{^tags/}
+    entry = { 'id' => nil, 'title' => "##{slug.sub(%r{^tags/}, '')}", 'slug' => slug }
     entry_type = nil
   else
     entry = db.execute('SELECT id, title, slug FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
@@ -593,7 +653,7 @@ get '/:slug/hit' do
       referer = "#{uri.scheme}://#{uri.host}#{port}/" if port
     end
     visitor_id = Digest::SHA256.hexdigest request.ip
-    visit_hash = Digest::SHA256.hexdigest [entry['id'], date, request.ip].join('-')
+    visit_hash = Digest::SHA256.hexdigest [entry['id'], entry['slug'], date, request.ip].join('-')
     visit_params = {
       'entry_id' => entry['id'],
       'entry_type' => entry_type,
@@ -617,7 +677,7 @@ get '/:slug/hit' do
   end
 end
 
-get '/admin/customize' do
+get '/ ||in/customize' do
   @site = { 'title' => 'Customize' }
   erb :admin_customize, layout: :admin_layout
 end
@@ -647,4 +707,25 @@ get '/:slug' do
   @page = @post
   @page['description'] = summary(@page['content'])
   erb :post, layout: :layout
+end
+
+get "/tags/:tag" do
+  db = create_database_connection
+  @tag = params['tag']
+  @entries = db.execute(<<-SQL, tag: @tag)
+    SELECT posts.title, posts.slug, posts.published_at, posts.content
+    FROM tags
+    INNER JOIN posts ON tags.taggable_id = posts.id AND tags.taggable_type = 'post'
+    WHERE tags.name = :tag
+    UNION ALL
+    SELECT pages.title, pages.slug, pages.published_at, pages.content
+    FROM tags
+    INNER JOIN pages ON tags.taggable_id = pages.id AND tags.taggable_type = 'page'
+    WHERE tags.name = :tag
+    ORDER BY published_at DESC
+    LIMIT 20
+  SQL
+  db.close
+  @page = { "title" => @tag, "slug" => "tags/#{@tag}", "noindex" => true }
+  erb :tag, layout: :layout
 end

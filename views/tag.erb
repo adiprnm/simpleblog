@@ -1,0 +1,8 @@
+<div class="mt-8">
+  <p>Displaying all entries for <a href="/tags/<%= @tag %>">#<%= @tag %></a></p>
+  <ul>
+    <% @entries.each do |entry| %>
+      <li><%= Date.parse(entry["published_at"]).strftime("%d %b %Y") %> – <a href="/<%= entry["slug"] %>"><%= entry["title"] %></a></li>
+    <% end %>
+  </ul>
+</div>

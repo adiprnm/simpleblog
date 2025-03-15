@@ -65,6 +65,18 @@ def migrate!
   )
   SQL
 
+  db.execute <<-SQL
+  CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    taggable_type TEXT,
+    taggable_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(name, taggable_type, taggable_id)
+  );
+  SQL
+
   db.close
 end
 
