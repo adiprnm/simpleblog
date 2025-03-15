@@ -107,6 +107,7 @@ img { width: 100%; }
 .pb-4 { padding-bottom: 1rem; }
 .pb-16 { padding-bottom: 4rem; }
 .w-full { width: 100%; }
+.max-w-full { max-width: 100%; }
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;

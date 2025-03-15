@@ -25,7 +25,7 @@
     <legend><strong>Posts/Pages</strong></legend>
 
     <% if @visits_by_entry.any? %>
-      <table class="w-full">
+      <table class="w-full max-w-full">
         <thead>
           <th class="text-left">Name</th>
           <th class="text-right">Visits</th>
@@ -48,7 +48,7 @@
     <legend><strong>Referer</strong></legend>
 
     <% if @visits_by_referer.any? %>
-      <table class="w-full">
+      <table class="w-full max-w-full">
         <thead>
           <th class="text-left">Name</th>
           <th class="text-right">Visits</th>
@@ -71,7 +71,7 @@
     <legend><strong>Country</strong></legend>
 
     <% if @visits_by_country.any? %>
-      <table class="w-full">
+      <table class="w-full max-w-full">
         <thead>
           <th class="text-left">Name</th>
           <th class="text-right">Visits</th>
@@ -94,7 +94,7 @@
     <legend><strong>Device</strong></legend>
 
     <% if @visits_by_device.any? %>
-      <table class="w-full">
+      <table class="w-full max-w-full">
         <thead>
           <th class="text-left">Name</th>
           <th class="text-right">Visits</th>
@@ -117,7 +117,7 @@
     <legend><strong>Browser</strong></legend>
 
     <% if @visits_by_browser.any? %>
-      <table class="w-full">
+      <table class="w-full max-w-full">
         <thead>
           <th class="text-left">Name</th>
           <th class="text-right">Visits</th>
