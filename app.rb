@@ -11,9 +11,12 @@ require 'yaml'
 require 'mini_magick'
 require_relative 'database'
 require_relative 'renderer'
+require_relative 'middlewares/cloudflare_real_ip'
 
 set :public_folder, "#{__dir__}/public"
 set :upload_folder, "#{__dir__}/storage/uploads"
+
+use CloudflareRealIP
 
 def authorized?
   @auth ||= Rack::Auth::Basic::Request.new(request.env)
