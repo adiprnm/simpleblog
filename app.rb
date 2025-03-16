@@ -691,7 +691,7 @@ get %r{/(.+)/hit} do |slug|
   if entry
     user_agent = UserAgent.parse(request.user_agent)
     geoip_db = MaxMindDB.new(File.expand_path(File.join('db/GeoLite2-Country.mmdb')))
-    date = Time.now.getlocal(site_settings['site.timezone_offset']).to_date
+    date = Time.now.getlocal(site_settings['site.timezone_offset']).to_date.to_s
     referer = params['ref']
     referer = nil if referer.to_s.include?(request.base_url) || referer.to_s.empty?
     if referer
