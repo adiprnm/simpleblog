@@ -35,7 +35,7 @@
     <div class="mt-4">
       <label for="footer_text">Footer text</label>
       <input type="hidden" name="site_settings[][key]" id="site_settings__key_footer_text" value="site.text.footer">
-      <input type="text" name="site_settings[][value]" class="block w-full border-b text-monospace" id="site_footer_text" value="<%= @settings["site.text.footer"] %>">
+      <textarea name="site_settings[][value]" class="block w-full border-b text-monospace min-h-16" id="site_footer_text" rows="4"><%= @settings["site.text.footer"] %></textarea>
       <% if @errors["site.text.footer"] %>
         <small class="text-danger block italic"><%= @errors["site.text.footer"] %></small>
       <% end %>

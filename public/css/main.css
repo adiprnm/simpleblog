@@ -132,3 +132,4 @@ img { width: 100%; }
   text-overflow: ellipsis;
   color: var(--color-primary);
 }
+.min-h-16 { min-height: 4rem; }
