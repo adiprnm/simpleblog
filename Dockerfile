@@ -1,4 +1,4 @@
-FROM ruby:3.3 AS builder
+FROM ruby:3.4 AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN bundle install --without development test
 COPY . .
 
 # Use a smaller base image for the final stage
-FROM ruby:3.3-slim AS runtime
+FROM ruby:3.4-slim AS runtime
 
 WORKDIR /app
 

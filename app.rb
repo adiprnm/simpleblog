@@ -10,6 +10,10 @@ require 'digest/sha2'
 require 'yaml'
 require 'mini_magick'
 require_relative 'database'
+require_relative 'renderer'
+
+set :public_folder, "#{__dir__}/public"
+set :upload_folder, "#{__dir__}/storage/uploads"
 
 def authorized?
   @auth ||= Rack::Auth::Basic::Request.new(request.env)
@@ -29,15 +33,13 @@ def slugify(string)
   string.downcase.gsub(/[^a-z0-9\- ]/i, '').gsub(/\ /, '-')
 end
 
-set :public_folder, "#{__dir__}/public"
-set :upload_folder, "#{__dir__}/storage/uploads"
-
 helpers do
-  def render_markdown(text)
-    text = text.gsub(/#(\w+)/) do |match|
-      "[#{match}](/tags/#{Regexp.last_match(1)})"
-    end
-    
+  def render_html(text)
+    renderer = Renderer.new(text)
+    text = renderer.render_hashtags
+                   .then { it.render_recent_posts }
+                   .then { it.render_popular_posts }
+                   .then { it.finished }
     markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true, tables: true)
     markdown.render(text)
   end
@@ -158,11 +160,13 @@ post '/admin/posts' do
 
   # Parse tags from content using a regex pattern for hashtags
   tags = params['content'].scan(/#\w+/).map { |tag| tag.delete('#').strip }.uniq
-  insert_query = tags.flat_map { |tag| [tag, 'post', post_id] }
-  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+  if tags.any?
+    insert_query = tags.flat_map { |tag| [tag, 'post', post_id] }
+    insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
 
-  # Insert tags directly without checking for existing ones
-  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+    # Insert tags directly without checking for existing ones
+    db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+  end
 
   db.close
   redirect '/admin/posts'
@@ -289,11 +293,13 @@ post '/admin/pages' do
 
   # Parse tags from content using a regex pattern for hashtags
   tags = params['content'].scan(/#\w+/).map { |tag| tag.delete('#').strip }.uniq
-  insert_query = tags.flat_map { |tag| [tag, 'page', page_id] }
-  insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
+  if tags.any?
+    insert_query = tags.flat_map { |tag| [tag, 'page', page_id] }
+    insert_bindings = tags.map { "(?, ?, ?)" }.join(', ')
 
-  # Insert tags directly without checking for existing ones
-  db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+    # Insert tags directly without checking for existing ones
+    db.execute_batch("INSERT INTO tags (name, taggable_type, taggable_id) VALUES #{insert_bindings} ON CONFLICT DO NOTHING", insert_query)
+  end
 
   db.close
   redirect '/admin/pages'

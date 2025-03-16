@@ -1,12 +1,3 @@
 <div class="mt-8">
-  <%= render_markdown @page["content"] %>
-
-  <% if @recent_posts.any? %>
-    <h3 class="mt-8">Recent Posts</h3>
-    <ul>
-      <% @recent_posts.each do |post| %>
-        <li><%= Date.parse(post["published_at"]).strftime("%d %b %Y") %> – <a href="/<%= post["slug"] %>"><%= post["title"] %></a></li>
-      <% end %>
-    </ul>
-  <% end %>
+  <%= render_html @page["content"] %>
 </div>
