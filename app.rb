@@ -543,7 +543,7 @@ post '/admin/upload' do
     end
   end
 
-  server_path = File.join(request.base_url, 'uploads', filename)
+  server_path = "/uploads/#{filename}"
 
   { success: true, path: server_path, filename: file[:filename] }.to_json
 end
