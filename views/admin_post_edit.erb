@@ -1,21 +1,24 @@
 <div class="mt-8">
-  <form action="/admin/posts/<%= @post['id'] %>" method="post">
+  <form action="/admin/posts/<%= @post['id'] %>" method="post" class="inline-block mr-2">
     <input type="hidden" name="_method" id="_method" value="delete">
 
     <input class="btn btn--danger" type="submit" name="commit" onclick='return confirm("Are you sure?")' value="Delete">
   </form>
+  <a href="/<%= @post['slug'] %>" target="_blank">
+    <button class="btn btn--secondary">View post</button>
+  </a>
 
   <form action="/admin/posts/<%= @post["id"] %>" class="mt-4" method="post">
     <input type="hidden" name="_method" id="_method" value="put">
 
-    <input type="text" name="title" placeholder="Title" id="title" value="<%= @post["title"] %>">
-    <div>
-      <span class="text-gray"><%= request.base_url %>/</span>
-      <input type="text" class="mt-4 inline border-b pb-1" name="slug" placeholder="Slug" id="slug" value="<%= @post["slug"] %>">
-    </div>
+    <input type="text" name="title" class="mt-4" placeholder="Title" id="title" value="<%= @post["title"] %>">
     <% if @errors["title"] %>
       <small class="text-danger block italic"><%= @errors["title"] %></small>
     <% end %>
+    <div class="flex items-end mt-4 gap-2 w-full">
+      <span class="text-gray"><%= request.base_url %>/</span>
+      <input type="text" class="inline border-b flex-grow" name="slug" placeholder="Slug" id="slug" value="<%= @post["slug"] %>">
+    </div>
     <textarea class="mt-8" name="content" placeholder="Post content" id="content"><%= @post["content"] %></textarea>
     <% if @errors["content"] %>
       <small class="text-danger block italic"><%= @errors["content"] %></small>

@@ -197,8 +197,8 @@ put '/admin/posts/:id' do
   @errors['title'] = 'Title is required' if params['title'].empty?
   @errors['content'] = 'Content is required' if params['content'].empty?
   if @errors.any?
-    @post = params.slice('title', 'content').merge('id' => params['id'])
-    @site = { 'title' => 'Edit Post' }
+    @post = params.slice('title', 'slug', 'content').merge('id' => params['id'])
+    @site = { 'title' => "Edit #{post['title']}" }
     return erb :admin_post_edit, layout: :admin_layout
   end
 
@@ -242,7 +242,7 @@ put '/admin/posts/:id' do
   end
 
   db.close
-  redirect '/admin/posts'
+  redirect "/admin/posts/#{params['id']}/edit"
 end
 
 delete '/admin/posts/:id' do
@@ -373,7 +373,7 @@ put '/admin/pages/:id' do
   end
 
   db.close
-  redirect '/admin/pages'
+  redirect "/admin/pages/#{params['id']}/edit"
 end
 
 delete '/admin/pages/:id' do

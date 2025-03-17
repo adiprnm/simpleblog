@@ -17,7 +17,7 @@ input#title {
   font-weight: 600;
   width: 100%;
   padding: 0;
-  &:focus { outline: none; }
+  outline: none;
 }
 input, select, textarea {
   border: none;
@@ -122,7 +122,10 @@ img { width: 100%; }
 .leading-loose { line-height: 2; }
 .break-word { word-wrap: break-word; }
 .flex { display: flex; }
+.items-center { align-items: center; }
+.items-end { align-items: end; }
 .flex-wrap { flex-wrap: wrap; }
+.flex-grow { flex-grow: 1; }
 .gap-2 { gap: 0.5rem; }
 .stats-title {
   text-align: left;
