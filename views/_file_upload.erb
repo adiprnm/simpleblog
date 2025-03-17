@@ -54,14 +54,13 @@
         // Parse and use the response if needed
         const response = JSON.parse(xhr.responseText);
         const imageMarkdown = `![${response.filename}](${response.path})`;
-
-        let contentValue = content.value
-        if (contentValue.endsWith('\n')) {
-          contentValue += imageMarkdown
-        } else {
-          contentValue += `\n${imageMarkdown}`
-        }
-        content.value = contentValue
+        const cursorPosition = content.selectionStart;
+        const text = content.value;
+        const newText = text.substring(0, cursorPosition) + imageMarkdown + text.substring(cursorPosition);
+        content.value = newText;
+        content.selectionStart = cursorPosition + imageMarkdown.length;
+        content.selectionEnd = cursorPosition + imageMarkdown.length;
+        content.focus();
       } else {
         statusDiv.style.color = 'red';
         statusDiv.textContent = `Upload failed. Server returned ${xhr.status}: ${xhr.statusText}`;
