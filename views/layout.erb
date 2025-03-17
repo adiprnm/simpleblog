@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <%
-    title = @page["title"] || site_settings["site.title"]
-    description = @page["description"] || site_settings["site.description"]
+    title = CGI.escapeHTML(@page["title"] || site_settings["site.title"])
+    description = CGI.escapeHTML(@page["description"] || site_settings["site.description"])
     favicon = site_settings["site.favicon"] || favicon_path
     json_ld = {
       "@context": "https://schema.org",
