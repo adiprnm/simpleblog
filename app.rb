@@ -182,6 +182,8 @@ get '/admin/posts/:id/edit' do
   @post = db.execute('SELECT * FROM posts WHERE id = ? LIMIT 1', params['id']).first
   halt 404, 'Post not found' unless @post
   @site = { 'title' => "Edit #{@post['title']}" }
+  @post['title'] = CGI.escapeHTML(@post['title'])
+
   db.close
   erb :admin_post_edit, layout: :admin_layout
 end
@@ -315,6 +317,7 @@ get '/admin/pages/:id/edit' do
   @page = db.execute('SELECT * FROM pages WHERE id = ? LIMIT 1', params['id']).first
   halt 404, 'Page not found' unless @page
   @site = { 'title' => "Edit #{@page['title']}" }
+  @page['title'] = CGI.escapeHTML(@page['title'])
   db.close
   erb :admin_page_edit, layout: :admin_layout
 end
