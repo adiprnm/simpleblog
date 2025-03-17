@@ -124,7 +124,7 @@ get '/admin/posts' do
   authorize!
   @site = { 'title' => 'Admin' }
   db = create_database_connection
-  @posts = db.execute('SELECT * FROM posts ORDER BY id DESC')
+  @posts = db.execute('SELECT * FROM posts ORDER BY created_at DESC')
   db.close
   erb :admin_post_index, layout: :admin_layout
 end
