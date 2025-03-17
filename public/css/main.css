@@ -136,3 +136,6 @@ img { width: 100%; }
   color: var(--color-primary);
 }
 .min-h-16 { min-height: 4rem; }
+#toolbar > button {
+  min-width: 2rem;
+}

@@ -17,9 +17,27 @@
     <% if @errors["title"] %>
       <small class="text-danger block italic"><%= @errors["title"] %></small>
     <% end %>
-    <div class="flex items-end mt-4 gap-2 w-full">
+    <div class="flex items-end mt-2 gap-2 w-full">
       <span class="text-gray"><%= request.base_url %>/</span>
       <input type="text" class="inline border-b flex-grow" name="slug" placeholder="Slug" id="slug" value="<%= @page["slug"] %>">
+    </div>
+    <div id="toolbar" class="mb-2 mt-8">
+      <button class="mt-2" onclick="bold()"><strong>b</strong></button>
+      <button class="mt-2" onclick="italic()")><em>i</em></button>
+      <button class="mt-2" onclick="strikethrough()"><s>&nbsp;s&nbsp;</s></button>
+      <button class="mt-2" onclick="h1()"><strong>H1</strong></button>
+      <button class="mt-2" onclick="h2()"><strong>H2</strong></button>
+      <button class="mt-2" onclick="h3()"><strong>H3</strong></button>
+      <button class="mt-2" onclick="h4()">h4</button>
+      <button class="mt-2" onclick="h5()">h5</button>
+      <button class="mt-2" onclick="h6()">h6</button>
+      <button class="mt-2" onclick="ul()"><strong>·</strong> ul</button>
+      <button class="mt-2" onclick="li()">1. ol</button>
+      <button class="mt-2" onclick="anchor()">anchor</button>
+      <button class="mt-2" onclick="blockquote()">quote</button>
+      <button class="mt-2" onclick="code()">code</button>
+      <button class="mt-2" onclick="codeblock()">codeblock</button>
+      <button class="mt-2" onclick="image()">image</button>
     </div>
     <textarea class="mt-8" name="content" placeholder="Post content" id="content"><%= @page["content"] %></textarea>
     <% if @errors["content"] %>
@@ -36,5 +54,9 @@
     </div>
   </form>
 </div>
+
+<% content_for :head do %>
+  <script src="/js/markdown-toolbar.js?id=<%= deployment_id %>"></script>
+<% end %>
 
 <%= erb :_file_upload %>
