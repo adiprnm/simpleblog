@@ -23,7 +23,7 @@
       <button class="mt-2" onclick="image()">image</button>
     </div>
 
-    <textarea class="mt-4" id="content" name="content" placeholder="Post content" id="content"><%= @post["content"] %></textarea>
+    <textarea class="mt-2" id="content" name="content" placeholder="Post content" id="content"><%= @post["content"] %></textarea>
     <% if @errors["content"] %>
       <small class="text-danger block italic"><%= @errors["content"] %></small>
     <% end %>
