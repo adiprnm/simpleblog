@@ -748,6 +748,10 @@ get '/feed.xml' do
 end
 
 get '/:slug' do
+  if params['slug'] == 'home'
+    redirect '/'
+  end
+
   db = create_database_connection
   @post = db.execute('SELECT title, slug, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
   @show_date = !@post.nil?
