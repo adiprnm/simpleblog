@@ -1,44 +1,51 @@
 <div class="mt-8">
   <% unless @page["slug"] == "home" %>
-    <form action="/admin/pages/<%= @page['id'] %>" method="post" class="inline-block mr-2">
+    <form action="/admin/pages/<%= @page['id'] %>" method="post" class="inline-block">
       <input type="hidden" name="_method" id="_method" value="delete">
 
       <input class="btn btn--danger" type="submit" name="commit" onclick='return confirm("Are you sure?")' value="Delete">
     </form>
   <% end %>
-  <a href="/<%= @page['slug'] %>" target="_blank">
-    <button class="btn btn--secondary">View page</button>
-  </a>
+  <% if @page["state"] == "published" %>
+    <a href="/<%= @page['slug'] %>" target="_blank">
+      <button class="btn btn--secondary">View page</button>
+    </a>
+  <% end %>
 
   <form action="/admin/pages/<%= @page["id"] %>" class="mt-4" method="post">
     <input type="hidden" name="_method" id="_method" value="put">
 
-    <input type="text" name="title" class="mt-4" placeholder="Title" id="title" value="<%= @page["title"] %>">
-    <% if @errors["title"] %>
-      <small class="text-danger block italic"><%= @errors["title"] %></small>
+    <% if @page["slug"] == "home" %>
+      <h1><%= @page["title"] %></h1>
+    <% else %>
+      <input type="text" name="title" class="mt-4" placeholder="Title" id="title" value="<%= @page["title"] %>">
+      <div class="flex items-end mt-2 gap-2 w-full">
+        <span class="text-gray"><%= request.base_url %>/</span>
+        <input type="text" class="inline border-b flex-grow" name="slug" placeholder="Slug" id="slug" value="<%= @page["slug"] %>">
+      </div>
     <% end %>
-    <div class="flex items-end mt-2 gap-2 w-full">
-      <span class="text-gray"><%= request.base_url %>/</span>
-      <input type="text" class="inline border-b flex-grow" name="slug" placeholder="Slug" id="slug" value="<%= @page["slug"] %>">
-    </div>
-    <div id="toolbar" class="mb-2 mt-8">
-      <button class="mt-2" onclick="bold()"><strong>b</strong></button>
-      <button class="mt-2" onclick="italic()")><em>i</em></button>
-      <button class="mt-2" onclick="strikethrough()"><s>&nbsp;s&nbsp;</s></button>
-      <button class="mt-2" onclick="h1()"><strong>H1</strong></button>
-      <button class="mt-2" onclick="h2()"><strong>H2</strong></button>
-      <button class="mt-2" onclick="h3()"><strong>H3</strong></button>
-      <button class="mt-2" onclick="h4()">h4</button>
-      <button class="mt-2" onclick="h5()">h5</button>
-      <button class="mt-2" onclick="h6()">h6</button>
-      <button class="mt-2" onclick="ul()"><strong>·</strong> ul</button>
-      <button class="mt-2" onclick="li()">1. ol</button>
-      <button class="mt-2" onclick="anchor()">anchor</button>
-      <button class="mt-2" onclick="blockquote()">quote</button>
-      <button class="mt-2" onclick="code()">code</button>
-      <button class="mt-2" onclick="codeblock()">codeblock</button>
-      <button class="mt-2" onclick="image()">image</button>
-    </div>
+    <details id="toolbar-toggler" class="mt-8 mb-2">
+      <summary class="text-sm list-style-none btn btn--secondary inline-block mb-2">Toggle toolbar</summary>
+
+      <div id="toolbar">
+        <button class="mt-2" onclick="bold()"><strong>b</strong></button>
+        <button class="mt-2" onclick="italic()")><em>i</em></button>
+        <button class="mt-2" onclick="strikethrough()"><s>&nbsp;s&nbsp;</s></button>
+        <button class="mt-2" onclick="h1()"><strong>H1</strong></button>
+        <button class="mt-2" onclick="h2()"><strong>H2</strong></button>
+        <button class="mt-2" onclick="h3()"><strong>H3</strong></button>
+        <button class="mt-2" onclick="h4()">h4</button>
+        <button class="mt-2" onclick="h5()">h5</button>
+        <button class="mt-2" onclick="h6()">h6</button>
+        <button class="mt-2" onclick="ul()"><strong>·</strong> ul</button>
+        <button class="mt-2" onclick="li()">1. ol</button>
+        <button class="mt-2" onclick="anchor()">anchor</button>
+        <button class="mt-2" onclick="blockquote()">quote</button>
+        <button class="mt-2" onclick="code()">code</button>
+        <button class="mt-2" onclick="codeblock()">codeblock</button>
+        <button class="mt-2" onclick="image()">image</button>
+      </div>
+    </details>
     <textarea class="mt-2" name="content" placeholder="Post content" id="content"><%= @page["content"] %></textarea>
     <% if @errors["content"] %>
       <small class="text-danger block italic"><%= @errors["content"] %></small>
@@ -54,6 +61,17 @@
     </div>
   </form>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toolbarToggler = document.getElementById('toolbar-toggler')
+    if (window.innerWidth >= 768) {
+      toolbarToggler.setAttribute("open", "true")
+    } else {
+      toolbarToggler.removeAttribute("open")
+    }
+  })
+</script>
 
 <% content_for :head do %>
   <script src="/js/markdown-toolbar.js?id=<%= deployment_id %>"></script>

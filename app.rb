@@ -260,7 +260,7 @@ get '/admin/pages' do
   authorize!
   @site = { 'title' => 'Admin' }
   db = create_database_connection
-  @pages = db.execute('SELECT * FROM pages ORDER BY id DESC')
+  @pages = db.execute('SELECT * FROM pages ORDER BY id ASC')
   db.close
   erb :admin_page_index, layout: :admin_layout
 end
@@ -754,9 +754,9 @@ get '/:slug' do
   end
 
   db = create_database_connection
-  @post = db.execute('SELECT title, slug, published_at, content FROM posts WHERE slug = ? LIMIT 1', params['slug']).first
+  @post = db.execute('SELECT title, slug, published_at, content FROM posts WHERE state = \'published\' AND slug = ? LIMIT 1', params['slug']).first
   @show_date = !@post.nil?
-  @post ||= db.execute('SELECT title, slug, published_at, content FROM pages WHERE slug = ? LIMIT 1', params['slug']).first
+  @post ||= db.execute('SELECT title, slug, published_at, content FROM pages WHERE state = \'published\' AND slug = ? LIMIT 1', params['slug']).first
   halt 404, 'Post/page not found!' unless @post
   db.close
   @page = @post
