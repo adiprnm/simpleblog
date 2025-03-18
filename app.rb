@@ -11,6 +11,7 @@ require 'yaml'
 require 'mini_magick'
 require_relative 'database'
 require_relative 'renderer'
+require_relative 'custom_html_renderer'
 require_relative 'middlewares/cloudflare_real_ip'
 
 set :public_folder, "#{__dir__}/public"
@@ -43,7 +44,7 @@ helpers do
                    .then { it.render_recent_posts }
                    .then { it.render_popular_posts }
                    .then { it.finished }
-    markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, strikethrough: true)
+    markdown = Redcarpet::Markdown.new(CustomHTMLRenderer.new, strikethrough: true, fenced_code_blocks: true)
     markdown.render(text)
   end
 
