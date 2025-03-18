@@ -139,8 +139,8 @@ img { width: 100%; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--color-primary);
 }
+.text-primary { color: var(--color-primary); }
 .min-h-16 { min-height: 4rem; }
 #toolbar > button {
   min-width: 2rem;

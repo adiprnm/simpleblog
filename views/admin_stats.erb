@@ -33,7 +33,7 @@
         <tbody>
           <% @visits_by_entry.each do |visit| %>
             <tr>
-              <td class="stats-title"><a href="/<%= visit['slug'] %>" target="_blank"><%= visit['title'] %></a></td>
+              <td class="stats-title text-primary"><a href="/<%= visit['slug'] %>" target="_blank"><%= visit['title'] %></a></td>
               <td class="text-right"><%= visit['count'] %></td>
             </tr>
           <% end %>
@@ -143,7 +143,7 @@
 
 <script>
   const ctx = document.getElementById('visits-chart');
-  const data = JSON.parse(`<%= @chart_data %>`) 
+  const data = JSON.parse(`<%= @chart_data %>`)
 
   new Chart(ctx, {
     type: 'bar',
