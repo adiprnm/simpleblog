@@ -3,9 +3,40 @@
     <button class="btn btn--primary">+ New Post</button>
   </a>
   <h3>Posts</h3>
-  <ul>
-    <% @posts.each do |post| %>
-      <li><%= Date.parse(post["created_at"]).strftime("%d %b %Y") %> – <a href="/admin/posts/<%= post["id"] %>/edit"><%= post["title"] %></a> <%= "(draft)" if post['state'] == 'draft' %></li>
-    <% end %>
-  </ul>
+  <form action="/admin/posts" method="get" class="mb-8" id="search-form">
+    <input type="text" name="title" id="post_title" class="border-b" value="<%= params['title'] %>" placeholder="Search by title">
+    <details class="mt-4" <%= "open" if params['from'].to_s.length.positive? || params['until'].to_s.length.positive? %>>
+      <summary class="text-sm">Period</summary>
+
+      <div class="flex gap-2 mt-2">
+        <div>
+          <label for="start" class="text-sm">From</label>
+          <input type="date" class="border-b" name="from" id="from_date" value="<%= params['from'] %>" onchange="document.getElementById('search-form').submit()">
+        </div>
+        <div>
+          <label for="start" class="text-sm">Until</label>
+          <input type="date" <%= "min=\"#{params['from']}\"" if params['from'].to_s.length.positive? %> class="border-b" name="until" id="until_date" value="<%= params['until'] %>" onchange="document.getElementById('search-form').submit()">
+        </div>
+      </div>
+    </details>
+  </form>
+
+  <% if @posts.size.positive? %>
+    <ul>
+      <% @posts.each do |post| %>
+        <li><%= Date.parse(post["created_at"]).strftime("%d %b %Y") %> – <a href="/admin/posts/<%= post["id"] %>/edit"><%= post["title"] %></a> <%= "(draft)" if post['state'] == 'draft' %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>Tidak ada post yang tersedia.</p>
+  <% end %>
+
+  <% if @has_prev_page %>
+    <% page_params = { page: params['page'] - 1, per_page: params['per_page'], title: params['title'], from: params['from'], until: params['until'] }.compact %>
+    <a class="text-none text-sm" href="/admin/posts?<%= URI.encode_www_form(page_params) %>">← Prev</a>
+  <% end %>
+  <% if @has_next_page %>
+    <% page_params = { page: params['page'] + 1, per_page: params['per_page'], title: params['title'], from: params['from'], until: params['until'] }.compact %>
+    <a class="text-none text-sm" href="/admin/posts?<%= URI.encode_www_form(page_params) %>">&nbsp; Next →</a>
+  <% end %>
 </div>

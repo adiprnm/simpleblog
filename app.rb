@@ -9,6 +9,7 @@ require 'useragent'
 require 'digest/sha2'
 require 'yaml'
 require 'mini_magick'
+require 'uri'
 require_relative 'database'
 require_relative 'renderer'
 require_relative 'custom_html_renderer'
@@ -123,9 +124,40 @@ end
 
 get '/admin/posts' do
   authorize!
-  @site = { 'title' => 'Admin' }
+  @site = { 'title' => 'Posts' }
+
+  params['page'] = params['page'] ? params['page'].to_i : 1
+  params['per_page'] = (params['per_page'] ? params['per_page'].to_i : 20)
+  limit = params['per_page']
+  offset = (params['page'] - 1) * params['per_page']
+
+  additional_conditions = "WHERE 1=1"
+  values = []
+  if params['title'].to_s.length.positive?
+    additional_conditions += " AND LOWER(title) LIKE ?"
+    values << "%#{params['title'].downcase}%"
+  end
+
+  tzoffset = site_settings['site.timezone_offset']
+  if params['from'].to_s.length.positive?
+    additional_conditions += " AND date(datetime(created_at, ?)) >= ?"
+    values << tzoffset
+    values << params['from']
+  end
+
+  if params['until'].to_s.length.positive?
+    additional_conditions += " AND date(datetime(created_at, ?)) <= ?"
+    values << tzoffset
+    values << params['until']
+  end
+
+  values << limit + 1
+  values << offset
+
   db = create_database_connection
-  @posts = db.execute('SELECT * FROM posts ORDER BY created_at DESC')
+  @posts = db.execute("SELECT * FROM posts #{additional_conditions} ORDER BY created_at DESC LIMIT ? OFFSET ?", values)
+  @has_next_page = @posts.size > params['per_page']
+  @has_prev_page = params['page'] > 1
   db.close
   erb :admin_post_index, layout: :admin_layout
 end

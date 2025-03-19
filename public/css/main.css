@@ -83,6 +83,7 @@ img { width: 100%; }
 
 .mt-2 { margin-top: 0.5rem; }
 .mt-4 { margin-top: 1rem; }
+.mb-8 { margin-bottom: 2rem; }
 .mt-8 { margin-top: 2rem; }
 .mb-16 { margin-bottom: 4rem; }
 .mb-2 { margin-bottom: 0.5rem; }
@@ -125,6 +126,7 @@ img { width: 100%; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
 .underline { text-decoration: underline; }
+.text-none { text-decoration: none; }
 .leading-loose { line-height: 2; }
 .break-word { word-wrap: break-word; }
 .flex { display: flex; }
