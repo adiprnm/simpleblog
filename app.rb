@@ -158,6 +158,7 @@ get '/admin/posts' do
   @posts = db.execute("SELECT * FROM posts #{additional_conditions} ORDER BY created_at DESC LIMIT ? OFFSET ?", values)
   @has_next_page = @posts.size > params['per_page']
   @has_prev_page = params['page'] > 1
+  @posts = @posts[0, params['per_page']]
   db.close
   erb :admin_post_index, layout: :admin_layout
 end
