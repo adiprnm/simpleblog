@@ -63,6 +63,15 @@
       <% end %>
     </div>
 
+    <div class="mt-4">
+      <label for="footer_text">Reply to email</label>
+      <input type="hidden" name="site_settings[][key]" id="site_settings__key_interation_reply_to_email" value="site.interaction.reply_to_email">
+      <textarea name="site_settings[][value]" class="block w-full border-b text-monospace min-h-16" id="site_footer_text" rows="4"><%= @settings["site.interaction.reply_to_email"] %></textarea>
+      <% if @errors["site.interaction.reply_to_email"] %>
+        <small class="text-danger block italic"><%= @errors["site.interaction.reply_to_email"] %></small>
+      <% end %>
+    </div>
+
     <input type="submit" name="commit" value="Save" class="btn--primary mt-4">
   </form>
 </div>

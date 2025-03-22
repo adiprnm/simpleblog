@@ -39,11 +39,12 @@ def slugify(string)
 end
 
 helpers do
-  def render_html(text)
-    renderer = Renderer.new(text)
+  def render_html(text, title = nil)
+    renderer = Renderer.new(text, title, site_settings)
     text = renderer.render_hashtags
                    .then { it.render_recent_posts }
                    .then { it.render_popular_posts }
+                   .then { it.render_reply_to_email }
                    .then { it.finished }
     markdown = Redcarpet::Markdown.new(CustomHTMLRenderer.new, strikethrough: true, fenced_code_blocks: true)
     markdown.render(text)
@@ -526,13 +527,17 @@ end
 put '/admin/settings' do
   authorize!
   settings = params['site_settings']
+  db = create_database_connection
+  requirements = db.execute('SELECT key, required FROM settings').map { |setting| [setting['key'], setting['required']] }.to_h
   @errors = {}
   settings.each do |setting|
     key, value = setting.values_at('key', 'value')
-    @errors[key] = "#{key} is required" if value.empty?
+    is_required = requirements[key]
+    @errors[key] = "#{key} is required" if value.empty? && is_required.to_i == 1
   end
   if @errors.any?
     @site = { 'title' => 'Settings' }
+    @timezone_offsets = YAML.load_file('tzoffset.yml')
     @settings = {}.tap do |hash|
       settings.each do |setting|
         key, value = setting.values_at('key', 'value')
@@ -542,7 +547,6 @@ put '/admin/settings' do
     return erb :admin_settings, layout: :admin_layout
   end
 
-  db = create_database_connection
   settings.each do |setting|
     key, value = setting.values_at('key', 'value')
     db.execute('UPDATE settings SET value = ? WHERE key = ?', [value, key])

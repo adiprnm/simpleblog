@@ -43,5 +43,9 @@ db.execute <<-SQL
   INSERT INTO settings (id, key, value) VALUES (7, 'site.timezone_offset', '+07:00')
   ON CONFLICT DO NOTHING;
 SQL
+db.execute <<-SQL
+  INSERT INTO settings (id, key, value, required) VALUES (8, 'site.interaction.reply_to_email', null, 0)
+  ON CONFLICT DO NOTHING;
+SQL
 
 db.close

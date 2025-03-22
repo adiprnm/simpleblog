@@ -3,5 +3,5 @@
     <small class="text-gray"><%= DateTime.parse(@post["published_at"]).strftime("%b %d, %Y") %></small>
   <% end %>
   <h1 class="mt-2"><%= @post["title"] %></h1>
-  <%= render_html @post["content"] %>
+  <%= render_html @post["content"], @post["title"] %>
 </article>

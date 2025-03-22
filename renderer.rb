@@ -1,9 +1,13 @@
 require_relative 'database'
 
 class Renderer
-  def initialize(text)
+  attr_reader :title, :site_settings
+
+  def initialize(text, title, site_settings)
     @db = create_database_connection
     @rendered_text = text
+    @title = title
+    @site_settings = site_settings
   end
 
   def render_hashtags
@@ -41,8 +45,22 @@ class Renderer
     self
   end
 
+  def render_reply_to_email
+    reply_to_email = site_settings["site.interaction.reply_to_email"].to_s.strip
+    logger = Logger.new(STDOUT)
+    logger.warn(reply_to_email != "")
+    logger.warn(title.to_s != "")
+    if reply_to_email != "" && title.to_s != ""
+      logger.warn("HERE")
+      reply_to_email = reply_to_email.gsub(/\{\{\s+subject\s+\}\}/, "subject=Re: #{title}")
+      @rendered_text = @rendered_text.strip + "\n\n#{reply_to_email}"
+    end
+
+    self
+  end
+
   def finished
     @db.close
     @rendered_text
   end
-end 
+end

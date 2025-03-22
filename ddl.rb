@@ -77,6 +77,15 @@ def migrate!
   );
   SQL
 
+  begin
+    db.execute <<-SQL
+      ALTER TABLE settings ADD COLUMN required BOOLEAN DEFAULT 1;
+    SQL
+  rescue SQLite3::SQLException => e
+    # noop
+    puts "#{e.message}.\n\nSkipping..."
+  end
+
   db.close
 end
 
