@@ -46,7 +46,12 @@ helpers do
                    .then { it.render_popular_posts }
                    .then { it.render_reply_to_email }
                    .then { it.finished }
-    markdown = Redcarpet::Markdown.new(CustomHTMLRenderer.new, strikethrough: true, fenced_code_blocks: true)
+    markdown = Redcarpet::Markdown.new(
+      CustomHTMLRenderer.new,
+      strikethrough: true,
+      fenced_code_blocks: true,
+      footnotes: true,
+    )
     markdown.render(text)
   end
 
