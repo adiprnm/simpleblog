@@ -662,6 +662,7 @@ get '/admin/stats' do
     GROUP BY entry_id, COALESCE(posts.slug, COALESCE(pages.slug, visits.entry_path))
     ORDER BY count DESC, title ASC
   SQL
+  @total_visits = @visits_by_entry.sum { |visit| visit["count"] }
   @visits_by_referer = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH referers AS (
       SELECT visit_hash, referer FROM visits
@@ -686,6 +687,7 @@ get '/admin/stats' do
     GROUP BY country
     ORDER BY count DESC, title ASC
   SQL
+  @total_visitors = @visits_by_country.sum { |visit| visit["count"] }
   @visits_by_device = db.execute(<<-SQL, starts: @starts.to_s, ends: @ends.to_s)
     WITH devices AS (
       SELECT DISTINCT visitor_id, device FROM visits

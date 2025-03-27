@@ -150,3 +150,5 @@ img { width: 100%; }
 .overflow-x-scroll { overflow-x: scroll; }
 .list-style-none { list-style: none; }
 .rounded { border-radius: 4px; }
+.m-0 { margin: 0 }
+.w-1\/2 { width: 50%; }
